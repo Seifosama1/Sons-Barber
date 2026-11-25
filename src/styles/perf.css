@@ -1,0 +1,100 @@
+/*
+ * =====================================================
+ *  PERFORMANCE LAYER — Sons Barber
+ *
+ *  Rules here fall into two buckets:
+ *
+ *  A) UNIVERSAL GOOD — applied to all devices
+ *     (compositing hints, layout containment, scroll opts)
+ *
+ *  B) LOW-END ONLY — only when <html class="low-end">
+ *     Set by detectDevice() in main.jsx via:
+ *       deviceMemory <= 2 GB  OR  hardwareConcurrency <= 4
+ *     (Samsung A20 2019: 2 GB RAM, 8 cores but weak ones)
+ * =====================================================
+ */
+
+/* ══════════════════════════════════════════════════
+   A) UNIVERSAL — good for every device
+   ══════════════════════════════════════════════════ */
+
+/* Force GPU compositing layer on fixed/animated elements */
+.client-nav,
+.barber-nav,
+.admin-nav {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Touch scroll feel & overscroll containment */
+.client-content,
+.barber-shell,
+.admin-content {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Async image decode — doesn't block main thread */
+img {
+  decoding: async;
+}
+
+/* Honor user's system "reduce motion" preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════
+   B) LOW-END ONLY — only applied when JS detects
+      deviceMemory <= 2 or hardwareConcurrency <= 4
+      and sets <html class="low-end">
+   ══════════════════════════════════════════════════ */
+
+/* Kill heavy continuous CSS animations on low-end to free GPU/CPU, but keep basic micro-transitions */
+html.low-end * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+}
+
+/* Replace expensive backdrop-filter blur with solid bg */
+html.low-end .client-nav {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(10, 10, 10, 0.98) !important;
+}
+
+html.low-end .settings-sheet,
+html.low-end .confirm-overlay,
+html.low-end .booking-overlay,
+html.low-end .lq-overlay,
+html.low-end .admin-modal-overlay,
+html.low-end .crew-modal-backdrop {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Remove decorative blur circles on auth page */
+html.low-end .bg-circle {
+  display: none !important;
+}
+
+/* Remove box-shadow from non-critical elements */
+html.low-end .bh-stat-card,
+html.low-end .bh-rating-item,
+html.low-end .ch-session-row {
+  box-shadow: none !important;
+}
+
+/* Faster skeleton shimmer */
+html.low-end .skeleton-box,
+html.low-end .sk-box {
+  animation: none !important;
+  background: #1a1a1a !important;
+}

@@ -1,0 +1,142 @@
+/* ===== OFFLINE / NO INTERNET SCREEN ===== */
+
+.no-internet-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.6rem;
+  box-sizing: border-box;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #ffffff;
+  animation: no-net-fade-in 0.3s ease-out;
+}
+
+@keyframes no-net-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Centered content block ── */
+.no-internet-content {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: no-net-rise 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes no-net-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Golden circular icon wrap ── */
+.no-internet-icon-wrap {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: rgba(201, 168, 76, 0.08);
+  border: 1.5px solid rgba(201, 168, 76, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2.2rem;
+  box-shadow: 0 0 32px rgba(201, 168, 76, 0.12);
+}
+
+/* ── Title ── */
+.no-internet-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.9rem 0;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+/* ── Description ── */
+.no-internet-desc {
+  font-size: 0.93rem;
+  color: #888888;
+  line-height: 1.65;
+  margin: 0 0 2.4rem 0;
+  max-width: 300px;
+}
+
+/* ── Buttons ── */
+.no-internet-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.no-internet-btn {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+  box-sizing: border-box;
+  letter-spacing: 0.01em;
+}
+
+/* Primary — golden filled */
+.no-internet-btn.retry {
+  background: linear-gradient(135deg, #d4a84b 0%, #b8902d 100%);
+  color: #000000;
+  box-shadow: 0 4px 20px rgba(201, 168, 76, 0.3);
+}
+
+.no-internet-btn.retry:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e0ba60 0%, #c9a03c 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(201, 168, 76, 0.4);
+}
+
+.no-internet-btn.retry:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Secondary — dark outlined */
+.no-internet-btn.offline {
+  background: #111111;
+  color: #c9a84c;
+  border: 1.5px solid #222222;
+}
+
+.no-internet-btn.offline:hover {
+  background: #181818;
+  border-color: rgba(201, 168, 76, 0.3);
+}
+
+/* ── Spinning refresh icon ── */
+.no-internet-retry-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.no-internet-retry-icon.spinning {
+  animation: spin-cw 0.7s linear infinite;
+}
+
+@keyframes spin-cw {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

@@ -1,0 +1,122 @@
+.lp-root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+.lp-bg { position: absolute; inset: 0; pointer-events: none; }
+.lp-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,168,76,0.12), transparent 70%);
+}
+.lp-circle-1 { width: 400px; height: 400px; top: -100px; right: -100px; }
+.lp-circle-2 { width: 300px; height: 300px; bottom: -80px; left: -80px; }
+
+.lp-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 380px;
+  padding: 2rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.lp-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.lp-logo {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, #c9a84c, #8b6914);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  color: #000;
+}
+.lp-logo svg { width: 32px; height: 32px; }
+.lp-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #e8c96d, #c9a84c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.lp-card {
+  width: 100%;
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-radius: 24px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.lp-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+}
+.lp-sub {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  margin-top: -1rem;
+}
+
+.lp-options {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lp-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.2s;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+.lp-option:active, .lp-option:hover {
+  border-color: #c9a84c;
+  background: rgba(201,168,76,0.07);
+}
+
+.lp-flag { font-size: 1.8rem; flex-shrink: 0; }
+
+.lp-option-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+.lp-option-name { font-size: 1rem; font-weight: 700; color: #fff; }
+.lp-option-sub  { font-size: 0.75rem; color: #666; }
+
+.lp-arrow { font-size: 1.1rem; color: #c9a84c; flex-shrink: 0; }

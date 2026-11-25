@@ -1,0 +1,81 @@
+/* ===== EGYPTIAN PHONE INPUT ===== */
+
+.phone-field {
+  display: flex;
+  align-items: center;
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  direction: ltr;
+  position: relative;
+  min-height: 52px;
+}
+
+.phone-field.focused {
+  border-color: #c9a84c;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+}
+.phone-field.valid {
+  border-color: #c9a84c;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.08);
+}
+.phone-field.invalid {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.08);
+}
+
+/* Prefix section */
+.phone-prefix {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 0.75rem;
+  flex-shrink: 0;
+  user-select: none;
+}
+.flag {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+.country-code {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #c9a84c;
+  letter-spacing: 0.5px;
+}
+.prefix-divider {
+  width: 1px;
+  height: 22px;
+  background: #2a2a2a;
+  margin-right: 2px;
+}
+
+/* Input field */
+.phone-input-field {
+  flex: 1;
+  padding: 0.85rem 0.6rem;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 1.5px;
+  min-width: 0;
+}
+.phone-input-field::placeholder {
+  color: #3a3a3a;
+  letter-spacing: 1px;
+}
+
+/* Operator badge — hidden */
+.operator-badge {
+  display: none;
+}
+
+/* Status icon — hidden */
+.phone-status-icon {
+  display: none;
+}

@@ -1,0 +1,422 @@
+/* ===== CLIENT SETTINGS TAB (Matching Design) ===== */
+.cs-page {
+  padding: 0 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 480px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  color: #fff;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Header */
+.cs-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0 0.8rem;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(16px);
+}
+
+.cs-header-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+.cs-back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #181818;
+  border: 1px solid #282828;
+  color: var(--gold, #c9a84c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cs-back-btn:hover {
+  background: #222;
+  border-color: var(--gold, #c9a84c);
+}
+
+/* Section label */
+.cs-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cs-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gold, #c9a84c);
+}
+
+.cs-section-header svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.2;
+}
+
+/* Card container */
+.cs-card {
+  background: #111111;
+  border: 1px solid #1f1f1f;
+  border-radius: 18px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Theme Row */
+.cs-theme-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cs-theme-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[dir="rtl"] .cs-theme-info {
+  text-align: right;
+}
+
+[dir="ltr"] .cs-theme-info {
+  text-align: left;
+}
+
+[dir="ltr"] .cs-back-btn svg {
+  transform: scaleX(-1);
+}
+
+[dir="ltr"] .cs-contact-send-btn svg {
+  transform: scaleX(-1);
+}
+
+.cs-theme-title {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.cs-theme-sub {
+  font-size: 0.72rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Theme switch capsule */
+.cs-theme-switch {
+  display: flex;
+  align-items: center;
+  background: #191919;
+  border: 1px solid #282828;
+  border-radius: 30px;
+  padding: 3px 5px;
+  gap: 5px;
+}
+
+.cs-theme-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: transparent;
+}
+
+.cs-theme-icon-btn.active {
+  background: var(--gold, #c9a84c);
+  color: #000;
+  box-shadow: 0 2px 8px rgba(201, 168, 76, 0.3);
+}
+
+/* Language selector */
+.cs-lang-card {
+  background: #111111;
+  border: 1px solid #1f1f1f;
+  border-radius: 18px;
+  padding: 5px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.cs-lang-pill {
+  padding: 0.72rem 1rem;
+  border-radius: 14px;
+  border: none;
+  background: transparent;
+  color: #888;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cs-lang-pill.active {
+  background: var(--gold, #c9a84c);
+  color: #000;
+  font-weight: 800;
+  box-shadow: 0 4px 15px rgba(201, 168, 76, 0.25);
+}
+
+/* Notifications list */
+.cs-notif-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+}
+
+.cs-notif-row:not(:last-child) {
+  border-bottom: 1px solid #181818;
+  padding-bottom: 0.75rem;
+}
+
+.cs-notif-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #eee;
+}
+
+/* Toggle Switch */
+.cs-toggle {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 27px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cs-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.cs-toggle-slider {
+  position: absolute;
+  inset: 0;
+  background-color: #333333;
+  transition: 0.3s;
+  border-radius: 34px;
+}
+
+.cs-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 21px;
+  width: 21px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.cs-toggle input:checked + .cs-toggle-slider {
+  background-color: var(--gold, #c9a84c);
+}
+
+.cs-toggle input:checked + .cs-toggle-slider:before {
+  transform: translateX(21px);
+  background-color: #111111;
+}
+
+/* Account & Password Box */
+.cs-account-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.3rem;
+}
+
+[dir="rtl"] .cs-account-title { text-align: right; }
+[dir="ltr"] .cs-account-title { text-align: left; }
+
+.cs-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+[dir="rtl"] .cs-input-group { text-align: right; }
+[dir="ltr"] .cs-input-group { text-align: left; }
+
+.cs-input-label {
+  font-size: 0.78rem;
+  color: #888;
+  font-weight: 600;
+}
+
+.cs-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: #080808;
+  border: 1px solid #222222;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+[dir="rtl"] .cs-input { text-align: right; }
+[dir="ltr"] .cs-input { text-align: left; }
+
+.cs-input:focus {
+  border-color: var(--gold, #c9a84c);
+}
+
+.cs-update-pwd-btn {
+  width: 100%;
+  padding: 0.9rem;
+  background: var(--gold, #c9a84c);
+  color: #000;
+  border: none;
+  border-radius: 13px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.4rem;
+}
+
+.cs-update-pwd-btn:hover {
+  background: var(--gold-light, #e8c96d);
+}
+
+.cs-logout-btn {
+  width: 100%;
+  padding: 0.88rem;
+  background: rgba(231, 76, 60, 0.08);
+  border: 1px solid rgba(231, 76, 60, 0.28);
+  color: #e74c3c;
+  border-radius: 13px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cs-logout-btn:hover {
+  background: rgba(231, 76, 60, 0.16);
+  border-color: #e74c3c;
+}
+
+/* Contact Us Section */
+.cs-contact-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cs-contact-desc {
+  font-size: 0.78rem;
+  color: #888;
+  margin: 0;
+  line-height: 1.4;
+}
+
+[dir="rtl"] .cs-contact-desc { text-align: right; }
+[dir="ltr"] .cs-contact-desc { text-align: left; }
+
+.cs-contact-bar {
+  display: flex;
+  align-items: center;
+  background: #111111;
+  border: 1px solid #222222;
+  border-radius: 35px;
+  padding: 5px 6px;
+  transition: border-color 0.2s;
+}
+
+.cs-contact-bar:focus-within {
+  border-color: var(--gold, #c9a84c);
+}
+
+.cs-contact-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 0.88rem;
+  padding: 0.6rem 1rem;
+  outline: none;
+  font-family: inherit;
+}
+
+[dir="rtl"] .cs-contact-input { text-align: right; }
+[dir="ltr"] .cs-contact-input { text-align: left; }
+
+.cs-contact-send-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--gold, #c9a84c);
+  color: #000;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, background 0.2s;
+}
+
+.cs-contact-send-btn:hover {
+  transform: scale(1.05);
+  background: var(--gold-light, #e8c96d);
+}
+
+/* Footer credits */
+.cs-footer {
+  text-align: center;
+  padding: 1.2rem 0 0.5rem;
+  color: #777;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.cs-footer strong {
+  color: #eee;
+  font-weight: 700;
+}

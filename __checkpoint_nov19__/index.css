@@ -1,0 +1,37 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  /* Prevent horizontal scroll on all devices */
+  overflow-x: hidden;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background: #0d0d0d;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  /* Mobile-safe viewport */
+  min-height: 100dvh;
+}
+
+/* Prevent inputs from zooming on iOS (needs font-size >= 16px) */
+input, textarea, select { font-size: max(16px, 1rem); }
+
+/* Prevent text overflow everywhere by default */
+* { word-break: break-word; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: #c9a84c44; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #c9a84c88; }
