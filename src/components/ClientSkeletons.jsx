@@ -179,3 +179,74 @@ export function ClientProfileSkeleton() {
     </div>
   )
 }
+
+/* Barber Home Tab Skeleton */
+export function BarberHomeSkeleton() {
+  return (
+    <div className="bh-page sk-wrapper" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <SkeletonBlock width={120} height={24} borderRadius={8} />
+        <SkeletonBlock width={70} height={30} borderRadius={20} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <SkeletonBlock height={80} borderRadius={16} />
+        <SkeletonBlock height={80} borderRadius={16} />
+      </div>
+      <SkeletonBlock height={120} borderRadius={16} />
+      <SkeletonBlock height={100} borderRadius={16} />
+    </div>
+  )
+}
+
+/* Barber Queue Tab Skeleton */
+export function BarberQueueSkeleton() {
+  return (
+    <div className="bq-page sk-wrapper" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <SkeletonBlock height={130} borderRadius={18} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <SkeletonBlock width={100} height={20} borderRadius={6} />
+        <SkeletonBlock width={90} height={34} borderRadius={10} />
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {[1, 2, 3].map(i => (
+          <SkeletonBlock key={i} height={64} borderRadius={14} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* Barber Schedule Tab Skeleton */
+export function BarberScheduleSkeleton() {
+  return (
+    <div className="bs-page sk-wrapper" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', gap: 8, overflowX: 'hidden' }}>
+        {[1, 2, 3, 4, 5].map(i => (
+          <SkeletonBlock key={i} width={60} height={75} borderRadius={12} style={{ flexShrink: 0 }} />
+        ))}
+      </div>
+      <SkeletonBlock height={45} borderRadius={12} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {[1, 2, 3].map(i => (
+          <SkeletonBlock key={i} height={70} borderRadius={14} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* Barber Profile Tab Skeleton */
+export function BarberProfileSkeleton() {
+  return (
+    <div className="bp-page sk-wrapper" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1.2rem', alignItems: 'center' }}>
+      <SkeletonBlock width={100} height={100} borderRadius={50} />
+      <SkeletonBlock width={140} height={22} borderRadius={8} />
+      <SkeletonBlock width={180} height={14} borderRadius={6} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, width: '100%' }}>
+        {[1, 2, 3, 4, 5, 6].map(i => (
+          <SkeletonBlock key={i} height={110} borderRadius={10} />
+        ))}
+      </div>
+    </div>
+  )
+}
