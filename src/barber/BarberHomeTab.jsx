@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { supabaseAdmin } from '../lib/supabase'
 import { serviceSelect } from '../lib/serviceDb'
 import { useRealtime } from '../lib/useRealtime'
+import { useLang } from '../context/LanguageContext'
+import { BarberHomeSkeleton } from '../components/ClientSkeletons'
 
 export default function BarberHomeTab({ user, onNavigateTab }) {
+  const { t } = useLang()
   const [isActive, setIsActive] = useState(user?.is_active ?? true)
   const [chairClient, setChairClient] = useState(null)
   const [nextClient, setNextClient] = useState(null)
@@ -14,35 +16,25 @@ export default function BarberHomeTab({ user, onNavigateTab }) {
   const [showAllRatings, setShowAllRatings] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // Debounce — realtime fires can bunch up; wait 400ms before re-fetching
-  const refetchTimer = useRef(null)
-  const debouncedFetch = useCallback(() => {
-    clearTimeout(refetchTimer.current)
-    refetchTimer.current = setTimeout(() => fetchHomeDataSilent(), 400)
-  }, [])
-
   useEffect(() => {
     if (!user?.id) return
     fetchHomeData()
-    return () => clearTimeout(refetchTimer.current)
   }, [user?.id])
 
-  useRealtime('waitlist',       {}, debouncedFetch)
-  useRealtime('barber_ratings', {}, debouncedFetch)
-  useRealtime('transactions',   {}, debouncedFetch)
+  useRealtime('waitlist', {}, () => {
+    fetchHomeData()
+  })
+
+  useRealtime('barber_ratings', {}, () => {
+    fetchHomeData()
+  })
+
+  useRealtime('transactions', {}, () => {
+    fetchHomeData()
+  })
 
   async function fetchHomeData() {
     setLoading(true)
-    await _loadHomeData()
-    setLoading(false)
-  }
-
-  // Silent refresh — used by realtime updates so there's no skeleton flash
-  async function fetchHomeDataSilent() {
-    await _loadHomeData()
-  }
-
-  async function _loadHomeData() {
 
     // 1. Fetch barber profile info (is_active, rating)
     const { data: prof } = await supabase
@@ -93,6 +85,8 @@ export default function BarberHomeTab({ user, onNavigateTab }) {
     } catch (e) {
       console.warn('Ratings query error:', e)
     }
+
+    setLoading(false)
   }
 
   async function toggleActive() {
@@ -130,6 +124,8 @@ export default function BarberHomeTab({ user, onNavigateTab }) {
     const d = new Date(iso)
     return `${d.getDate()}/${d.getMonth() + 1}`
   }
+
+  if (loading) return <BarberHomeSkeleton />
 
   return (
     <div className="bh-container">
