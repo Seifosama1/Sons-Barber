@@ -3,10 +3,12 @@ import { supabase } from '../lib/supabase'
 import { serviceSelect, serviceUpdate, serviceInsert } from '../lib/serviceDb'
 import { useRealtime } from '../lib/useRealtime'
 import { useConfirm } from '../context/ConfirmContext'
-import { queueTurnText, queueUpdateText } from '../lib/notifText'
+import { useLang } from '../context/LanguageContext'
+import { BarberQueueSkeleton } from '../components/ClientSkeletons'
 
 export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpenAdd }) {
   const { askConfirm } = useConfirm()
+  const { t } = useLang()
   const [queue, setQueue] = useState([])
   const [chairEntry, setChairEntry] = useState(null)
   const [pendingPayment, setPendingPayment] = useState(null)
@@ -189,23 +191,21 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
     if (!entry?.client_id) return
     setNotifSent(entry.id)
 
-    let notifTitle, notifBody
+    let notifBody = ''
     if (queueIdx === 0 && chairEntry) {
-      const text = await queueTurnText(entry.client_id, user.name)
-      notifTitle = text.title
-      notifBody  = text.body
+      // 1 on chair and this client is #1 in line -> "أنت التالي في الدور، توجه للمحل"
+      notifBody = `أنت التالي في الدور عند ${user.name}، توجه للمحل الآن`
     } else {
+      // Ahead count = queueIdx (since 0-indexed in waiting list)
       const aheadCount = queueIdx + (chairEntry ? 1 : 0)
-      const text = await queueUpdateText(entry.client_id, user.name, aheadCount)
-      notifTitle = text.title
-      notifBody  = text.body
+      notifBody = `يوجد ${aheadCount} عملاء قبلك في الدور عند ${user.name}. سنبلغك فور اقتراب دورك`
     }
 
     await serviceInsert('notifications', {
       target_user_id: entry.client_id,
-      title: notifTitle,
-      body:  notifBody,
-      type:  'next_in_queue',
+      title: 'تحديث طابور الانتظار',
+      body: notifBody,
+      type: 'next_in_queue',
       is_read: false,
     })
 
@@ -339,6 +339,8 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
     setShowAddModal(false)
     fetchQueue()
   }
+
+  if (loading) return <BarberQueueSkeleton />
 
   return (
     <div className="bq-container">
