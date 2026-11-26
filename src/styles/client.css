@@ -1479,6 +1479,13 @@
   gap: 0.4rem;
   padding-top: 0.5rem;
 }
+
+/* Override barber's bp-avatar-wrap when used in client profile */
+.cp-hero .bp-avatar-wrap {
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+}
 .cp-avatar {
   width: 72px;
   height: 72px;
