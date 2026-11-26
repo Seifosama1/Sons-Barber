@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { useLang } from '../context/LanguageContext'
-import { notifyBarberQueueJoin } from '../lib/usePushNotifications'
 import Toast from '../components/Toast'
 import { ClientWaitlistSkeleton } from '../components/ClientSkeletons'
 
@@ -26,7 +25,7 @@ export default function ClientWaitlist({ user }) {
   async function fetchAll() {
     const { data: barberData } = await supabase
       .from('profiles')
-      .select('id, name, is_active, avatar_url, on_seat_client_id')
+      .select('id, name, is_active, avatar_url, on_seat_client_id, hide_queue_count')
       .eq('role', 'barber')
       .order('created_at')
 
@@ -67,6 +66,7 @@ export default function ClientWaitlist({ user }) {
         onSeat:       !!b.on_seat_client_id,
         myEntry:      myEntry || null,
         myQueueIndex: myQueueIndex,
+        hideQueue:    !!b.hide_queue_count,
       }
     }))
 
@@ -93,14 +93,6 @@ export default function ClientWaitlist({ user }) {
       setToast({ msg: t('toastError'), type: 'error' })
       return
     }
-
-    // Notify barber via push (non-blocking — fires and forgets)
-    const newCount = (info.waiting || 0) + 1
-    notifyBarberQueueJoin({
-      barberId:   barber.id,
-      clientName: user.name || 'عميل',
-      queueCount: newCount,
-    })
 
     // Pick the right toast based on queue state at the moment of joining
     if (!info.onSeat && info.waiting === 0) {
@@ -136,6 +128,9 @@ export default function ClientWaitlist({ user }) {
       }
     }
 
+    // If barber chose to hide queue count for privacy, do not reveal queue depth badges to general viewers
+    if (info.hideQueue) return null
+
     // Default general badges for other viewers
     if (!onSeat && waiting === 0) return { label: t('badgeFree'),    cls: 'free' }
     if (!onSeat && waiting === 1) return { label: t('badgeOnWay'),   cls: 'waiting' }
@@ -145,11 +140,6 @@ export default function ClientWaitlist({ user }) {
   }
 
   if (loading) return <ClientWaitlistSkeleton />
-
-  // Check if the client is already in ANY barber's queue
-  const alreadyInAnyQueue = Object.values(waitlistMap).some(
-    info => info?.myEntry?.status === 'waiting' || info?.myEntry?.status === 'in_service'
-  )
 
   return (
     <div className="cw-page">
@@ -171,8 +161,6 @@ export default function ClientWaitlist({ user }) {
           const inMyQueue = myEntry?.status === 'waiting'
           const onChair   = myEntry?.status === 'in_service'
           const isActive  = b.is_active
-          // Disable join if already in another barber's queue
-          const isOtherBarberBlocked = alreadyInAnyQueue && !inMyQueue && !onChair
 
           return (
             <div key={b.id} className={`cw-barber-card ${!isActive ? 'inactive' : ''}`}>
@@ -199,10 +187,6 @@ export default function ClientWaitlist({ user }) {
                 ) : inMyQueue ? (
                   <button className="cw-leave-btn" onClick={() => leaveWaitlist(info.myEntry.id)}>
                     {t('leaveQueue')}
-                  </button>
-                ) : isOtherBarberBlocked ? (
-                  <button className="cw-join-btn" disabled style={{ opacity: 0.35, cursor: 'not-allowed' }}>
-                    {t('alreadyInQueue')}
                   </button>
                 ) : (
                   <button className="cw-join-btn" disabled={joining === b.id} onClick={() => joinWaitlist(b)}>
