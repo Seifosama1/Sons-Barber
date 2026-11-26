@@ -120,6 +120,7 @@ const translations = {
     toastRegistered: 'تم تسجيلك! توجه للصالون',
     toastYouNext:    'تم تسجيلك! أنت التالي في الدور',
     toastWillNotify: 'تم تسجيلك! سنبلغك عندما يحين دورك',
+    toastAlreadyInQueue: 'أنت مسجل بالفعل في طابور حلاق آخر! يرجى إلغاء تسجيلك أولاً.',
     toastError:      'حدث خطأ، حاول مرة أخرى',
 
     // ── Barbers tab ──
@@ -474,6 +475,7 @@ const translations = {
     toastRegistered: 'Done! Head to the salon please',
     toastYouNext:    'Done! You are next in turn',
     toastWillNotify: 'Done! You will be notified when next in turn',
+    toastAlreadyInQueue: 'You are already in another barber\'s queue! Please cancel that first.',
     toastError:      'An error occurred, please try again',
 
     // ── Barbers tab ──
