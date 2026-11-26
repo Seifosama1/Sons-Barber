@@ -127,14 +127,31 @@ export default function BarberSettings({ user, onBack }) {
         </div>
 
         <div className="cs-card">
-          <div className="cs-theme-box">
-            <div className="cs-theme-icon-wrap">
+          <div className="cs-theme-row">
+            <div className="cs-theme-switch">
               <button
                 type="button"
-                className={`cs-theme-choice ${theme === 'dark' ? 'active' : ''}`}
+                className="cs-theme-icon-btn"
+                title={t('settingsLightSoon')}
+                onClick={() => setToast({ msg: t('settingsLightSoon'), type: 'info' })}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="4" />
+                  <line x1="12" y1="2" x2="12" y2="4" />
+                  <line x1="12" y1="20" x2="12" y2="22" />
+                  <line x1="4.93" y1="4.93" x2="6.34" y2="6.34" />
+                  <line x1="17.66" y1="17.66" x2="19.07" y2="19.07" />
+                  <line x1="2" y1="12" x2="4" y2="12" />
+                  <line x1="20" y1="12" x2="22" y2="12" />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                className={`cs-theme-icon-btn ${theme === 'dark' ? 'active' : ''}`}
                 title={t('settingsDarkMode')}
               >
-                <svg viewBox="0 0 24 24" fill="currentColor">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
               </button>
@@ -209,7 +226,7 @@ export default function BarberSettings({ user, onBack }) {
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
-          <span>خصوصية الطابور</span>
+          <span>{lang === 'en' ? 'Queue Privacy' : 'خصوصية الطابور'}</span>
         </div>
 
         <div className="cs-card">
@@ -244,36 +261,41 @@ export default function BarberSettings({ user, onBack }) {
         </div>
 
         <div className="cs-card">
-          <span className="cs-pass-title">{t('settingsChangePass')}</span>
+          <div className="cs-account-title">{t('settingsChangePass')}</div>
 
-          <form onSubmit={handleUpdatePassword} className="cs-pass-form">
-            <div className="cs-field">
-              <label>{t('settingsCurrentPass')}</label>
+          <form onSubmit={handleUpdatePassword} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div className="cs-input-group">
+              <label className="cs-input-label">{t('settingsCurrentPass')}</label>
               <input
                 type="password"
-                placeholder="••••••"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="cs-input"
+                placeholder="••••••••"
+                value="••••••••"
+                readOnly
+                disabled
+                style={{ opacity: 0.7, cursor: 'not-allowed', background: '#181818' }}
                 autoComplete="current-password"
               />
             </div>
 
-            <div className="cs-field">
-              <label>{t('settingsNewPass')}</label>
+            <div className="cs-input-group">
+              <label className="cs-input-label">{t('settingsNewPass')}</label>
               <input
                 type="password"
-                placeholder="••••••"
+                className="cs-input"
+                placeholder="••••••••"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 autoComplete="new-password"
               />
             </div>
 
-            <div className="cs-field">
-              <label>{t('settingsConfirmPass')}</label>
+            <div className="cs-input-group">
+              <label className="cs-input-label">{t('settingsConfirmPass')}</label>
               <input
                 type="password"
-                placeholder="••••••"
+                className="cs-input"
+                placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 autoComplete="new-password"
@@ -282,12 +304,12 @@ export default function BarberSettings({ user, onBack }) {
 
             <button
               type="submit"
-              className="cs-submit-pass-btn"
               disabled={updatingPwd}
+              className="cs-update-pwd-btn"
             >
               {updatingPwd ? (
                 <>
-                  <span className="cs-btn-spinner" />
+                  <span className="btn-spinner" style={{ width: 14, height: 14 }} />
                   {t('settingsUpdating')}
                 </>
               ) : (
