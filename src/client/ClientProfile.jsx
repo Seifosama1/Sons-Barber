@@ -9,20 +9,19 @@ import { ClientProfileSkeleton } from '../components/ClientSkeletons'
 
 export default function ClientProfile({ user, onOpenSettings }) {
   const { t } = useLang()
-  const [copied, setCopied] = useState(false)
-  const [toast, setToast]   = useState(null)
+  const [copied, setCopied]   = useState(false)
+  const [toast, setToast]     = useState(null)
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || user?.avatarUrl || null)
-  const [showAvatarModal, setShowAvatarModal] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const avatarFileRef = useRef(null)
-
-  if (!user?.id) return <ClientProfileSkeleton />
 
   useEffect(() => {
     if (user?.avatar_url || user?.avatarUrl) {
       setAvatarUrl(user.avatar_url || user.avatarUrl)
     }
   }, [user?.avatar_url, user?.avatarUrl])
+
+  if (!user?.id) return <ClientProfileSkeleton />
 
   function copyCode() {
     navigator.clipboard.writeText(user.client_code || '').then(() => {
@@ -96,7 +95,7 @@ export default function ClientProfile({ user, onOpenSettings }) {
 
       <div className="cp-hero">
         <div className="bp-avatar-wrap">
-          <div className="cp-avatar" onClick={() => setShowAvatarModal(true)} style={{ cursor: 'pointer', overflow: 'hidden' }}>
+          <div className="cp-avatar" style={{ overflow: 'hidden' }}>
             {avatarUrl ? (
               <img src={avatarUrl} alt={user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
@@ -122,40 +121,6 @@ export default function ClientProfile({ user, onOpenSettings }) {
         <div className="cp-phone">{user?.phone}</div>
       </div>
 
-      {/* Avatar Modal */}
-      {showAvatarModal && (
-        <div className="bp-modal-overlay" onClick={() => setShowAvatarModal(false)} style={{ zIndex: 1200 }}>
-          <button className="bp-modal-close" onClick={() => setShowAvatarModal(false)}>✕</button>
-          
-          <div className="bp-modal-avatar-large">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              <span>{initial}</span>
-            )}
-          </div>
-
-          <div className="bp-avatar-modal-actions">
-            <button
-              className="bp-modal-btn edit"
-              onClick={() => {
-                setShowAvatarModal(false)
-                avatarFileRef.current?.click()
-              }}
-            >
-              تغيير الصورة
-            </button>
-            {avatarUrl && (
-              <button
-                className="bp-modal-btn delete"
-                onClick={handleDeleteAvatar}
-              >
-                حذف الصورة
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       <div className="cp-code-card">
         <div className="cp-code-label">{t('clientCode')}</div>
