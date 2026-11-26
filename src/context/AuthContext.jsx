@@ -24,11 +24,16 @@ export function AuthProvider({ children }) {
       } else {
         setLoading(false)
       }
+    }).catch(() => {
+      setLoading(false)
     })
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        fetchProfile(session.user.id)
+        // If user is already loaded and matches current session, avoid blank flickers
+        if (user?.id !== session.user.id) {
+          await fetchProfile(session.user.id)
+        }
       } else {
         setUser(null)
         setLoading(false)
@@ -64,31 +69,50 @@ export function AuthProvider({ children }) {
   }, [user?.id])
 
   async function fetchProfile(userId) {
-    const { data, error: err } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
+    try {
+      const { data, error: err } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
 
-    if (data) {
-      setUser({
-        id:           data.id,
-        name:         data.name,
-        phone:        data.phone,
-        birthday:     data.birthday,
-        role:         data.role,
-        avatar_url:   data.avatar_url,
-        avatarUrl:    data.avatar_url,
-        bio:          data.bio,
-        instagramUrl: data.instagram_url,
-        tiktokUrl:    data.tiktok_url,
-        whatsappPhone:data.whatsapp_phone,
-        client_code:  data.client_code,
-        total_cuts:   data.total_cuts  ?? 0,
-        loyalty_cuts: data.loyalty_cuts ?? 0,
-      })
+      if (data) {
+        setUser({
+          id:           data.id,
+          name:         data.name || 'عميل',
+          phone:        data.phone,
+          birthday:     data.birthday,
+          role:         data.role || (data.phone === ADMIN_PHONE ? 'admin' : 'client'),
+          avatar_url:   data.avatar_url,
+          avatarUrl:    data.avatar_url,
+          bio:          data.bio,
+          instagramUrl: data.instagram_url,
+          tiktokUrl:    data.tiktok_url,
+          whatsappPhone:data.whatsapp_phone,
+          client_code:  data.client_code,
+          total_cuts:   data.total_cuts  ?? 0,
+          loyalty_cuts: data.loyalty_cuts ?? 0,
+        })
+      } else if (err) {
+        console.warn('Profile fetch warning:', err)
+        // Fallback profile if profile row is still being populated
+        const { data: userData } = await supabase.auth.getUser()
+        const meta = userData?.user?.user_metadata || {}
+        setUser({
+          id: userId,
+          name: meta.name || 'عميل',
+          phone: meta.phone || '',
+          birthday: meta.birthday || '',
+          role: meta.role || (meta.phone === ADMIN_PHONE ? 'admin' : 'client'),
+          total_cuts: 0,
+          loyalty_cuts: 0,
+        })
+      }
+    } catch (e) {
+      console.error('fetchProfile error:', e)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   async function login(phone, password) {
@@ -96,10 +120,18 @@ export function AuthProvider({ children }) {
     const cleanPhone = phone.replace(/\s/g, '')
     const email = phoneToEmail(cleanPhone)
 
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password })
+    setLoading(true)
+    const { data: authData, error: err } = await supabase.auth.signInWithPassword({ email, password })
     if (err) {
       setError('errPhonePass')
+      setLoading(false)
       return false
+    }
+
+    if (authData?.user) {
+      await fetchProfile(authData.user.id)
+    } else {
+      setLoading(false)
     }
     return true
   }
