@@ -1,125 +1,79 @@
-// Sons Barber — Service Worker
-// Cache-first for static assets, network-first for API calls
-
-const CACHE_NAME = 'sons-barber-v1'
-const STATIC_ASSETS = [
+const CACHE_NAME = 'sons-barber-cache-v1';
+const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/manifest.json',
-]
+  '/app-icon-gold.png',
+  '/app-icon.jpg',
+  '/favicon.svg',
+  '/scissors.svg'
+];
 
-// ── Install: pre-cache shell ──────────────────────────────────
+// Install: Cache critical static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  )
-  self.skipWaiting()
-})
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    }).then(() => self.skipWaiting())
+  );
+});
 
-// ── Activate: clean old caches ────────────────────────────────
+// Activate: Clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
-      )
-    )
-  )
-  self.clients.claim()
-})
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
+  );
+});
 
-// ── Fetch strategy ────────────────────────────────────────────
+// Fetch: Network first with Cache fallback for seamless offline experience
 self.addEventListener('fetch', (event) => {
-  const { request } = event
-  const url = new URL(request.url)
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
 
-  // Skip non-GET, chrome-extension, and supabase/external API requests
-  if (
-    request.method !== 'GET' ||
-    url.protocol === 'chrome-extension:' ||
-    url.hostname.includes('supabase.co') ||
-    url.hostname.includes('googleapis.com') ||
-    url.hostname.includes('gstatic.com')
-  ) {
-    return
-  }
+  const url = new URL(event.request.url);
 
-  // Network-first for navigation (HTML pages) → fallback to cache
-  if (request.mode === 'navigate') {
+  // For Supabase REST calls, cache responses to allow offline viewing of recent data
+  if (url.origin.includes('supabase.co')) {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const clone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
-          return response
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open('sons-barber-data-v1').then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
+          return networkResponse;
         })
-        .catch(() => caches.match('/index.html'))
-    )
-    return
+        .catch(() => caches.match(event.request))
+    );
+    return;
   }
 
-  // Cache-first for static assets (JS, CSS, fonts, images)
+  // For app assets & pages: Network first, fall back to cache
   event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) return cached
-
-      return fetch(request).then((response) => {
-        // Only cache successful same-origin responses
-        if (
-          response.ok &&
-          response.type !== 'opaque' &&
-          url.origin === self.location.origin
-        ) {
-          const clone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
         }
-        return response
+        return networkResponse;
       })
-    })
-  )
-})
-
-// ── Push Notifications (native) ──────────────────────────────
-self.addEventListener('push', (event) => {
-  if (!event.data) return
-
-  let payload
-  try { payload = event.data.json() }
-  catch { payload = { title: 'Sons Barber', body: event.data.text() } }
-
-  const options = {
-    body:               payload.body || '',
-    icon:               '/app-icon-gold.png',
-    badge:              '/app-icon-gold.png',
-    tag:                payload.tag  || 'sons-barber-notif',
-    data:               payload.data || {},
-    vibrate:            [200, 100, 200],
-    requireInteraction: false,
-    renotify:           true,
-  }
-
-  event.waitUntil(
-    self.registration.showNotification(payload.title || 'Sons Barber', options)
-  )
-})
-
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close()
-  const data      = event.notification.data || {}
-  const targetTab = data.tab || 'home'
-  const targetUrl = targetTab === 'queue' ? '/barber' : '/client'
-
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      for (const client of windowClients) {
-        const isBarber = client.url.includes('/barber')
-        const isClient = client.url.includes('/client')
-        if ((targetTab === 'queue' && isBarber) || (targetTab === 'notifications' && isClient)) {
-          client.postMessage({ type: 'OPEN_TAB', tab: targetTab })
-          return client.focus()
-        }
-      }
-      return clients.openWindow(targetUrl)
-    })
-  )
-})
+      .catch(() => {
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
+          // Fallback to offline index for SPA routes
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html');
+          }
+          return null;
+        });
+      })
+  );
+});
