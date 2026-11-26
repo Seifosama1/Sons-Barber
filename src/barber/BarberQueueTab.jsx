@@ -217,12 +217,12 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
     const entry = queue.find(e => e.id === entryId)
     if (!entry) return
 
-    const clientName = entry.client?.name || entry.walk_in_name || 'العميل'
+    const clientName = entry.client?.name || entry.walk_in_name || displayName(entry) || 'العميل'
     const ok = await askConfirm({
-      title: 'إزالة من قائمة الانتظار',
-      message: `هل أنت متأكد من حذف ${clientName} من قائمة الانتظار؟`,
-      confirmText: 'نعم، إزالة',
-      cancelText: 'إلغاء',
+      title: t('barberConfirmDeleteTitle'),
+      message: t('barberConfirmDeleteMsg', { name: clientName }),
+      confirmText: t('barberConfirmDeleteYes'),
+      cancelText: t('barberCancelBtn'),
       type: 'danger',
     })
     if (!ok) {
@@ -346,8 +346,8 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
     <div className="bq-container">
       {/* Header */}
       <div className="bq-header">
-        <h1 className="bq-title">طابوري</h1>
-        <div className="bq-live-dot">مباشر</div>
+        <h1 className="bq-title">{t('waitlistTitle')}</h1>
+        <div className="bq-live-dot">{t('barberLiveBadge')}</div>
       </div>
 
       {/* Slot 1: On Chair */}
@@ -355,7 +355,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
         <div className="bq-slot-hdr">
           <div className="bq-slot-title">
             <span className="bq-slot-num">1</span>
-            <span>على الكرسي</span>
+            <span>{t('barberOnChairSlot')}</span>
           </div>
           <span className="bq-slot-badge">{chairEntry ? 1 : 0}</span>
         </div>
@@ -375,11 +375,11 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
               <div className="lq-cust-meta">
                 <div className="lq-cust-name">{displayName(chairEntry)}</div>
                 <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <span className="lq-tag cutting">على الكرسي</span>
+                  <span className="lq-tag cutting">{t('barberOnChairSlot')}</span>
                 </div>
                 <div className="lq-cust-sub">
                   <span className="lq-sub-badge">
-                    {chairEntry.added_by_admin ? 'أضافه الأدمن' : (isAppClient(chairEntry) ? 'عبر التطبيق' : 'حضور مباشر')}
+                    {chairEntry.added_by_admin ? t('barberAddedByAdminTag') : (isAppClient(chairEntry) ? t('barberAppClient') : t('barberWalkInClient'))}
                   </span>
                   {displayPhone(chairEntry) && (
                     <> · <span className="lq-phone-ltr" dir="ltr">{displayPhone(chairEntry)}</span></>
@@ -392,12 +392,12 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
             </div>
           </div>
         ) : (
-          <div className="lq-empty-box" style={{ margin: '0.4rem 0' }}>الكرسي فارغ · اضغط ابدأ للبدء</div>
+          <div className="lq-empty-box" style={{ margin: '0.4rem 0' }}>{t('barberChairEmptyPrompt')}</div>
         )}
 
         {chairEntry && (
           <button className="lq-btn-gold-full" onClick={finishSession} style={{ marginTop: 8 }}>
-            إنهاء الجلسة
+            {t('barberFinishSessionBtn')}
           </button>
         )}
       </div>
@@ -407,7 +407,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
         <div className="bq-slot-hdr">
           <div className="bq-slot-title">
             <span className="bq-slot-num">2</span>
-            <span>قائمة الانتظار</span>
+            <span>{t('barberWaitingSlot')}</span>
           </div>
           <span className="bq-slot-badge">{queue.length}</span>
         </div>
@@ -417,7 +417,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
             <div className="app-spinner" style={{ width: 24, height: 24 }} />
           </div>
         ) : queue.length === 0 ? (
-          <div className="lq-empty-box">لا أحد في الانتظار</div>
+          <div className="lq-empty-box">{t('barberNoOneInQueue')}</div>
         ) : (
           <div className="lq-cust-list">
             {queue.map((entry, idx) => {
@@ -445,7 +445,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                       </svg>
-                      <span>{isOverThreshold ? 'أفلت للحذف' : 'اسحب للحذف'}</span>
+                      <span>{isOverThreshold ? t('barberReleaseToDelete') : t('barberSwipeToDelete')}</span>
                     </div>
                   </div>
 
@@ -478,7 +478,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
                           setDragOverIndex(null)
                         }}
                         onPointerDown={(e) => e.stopPropagation()}
-                        title="اسحب لإعادة الترتيب"
+                        title={t('barberDragReorderHint')}
                       >
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                           <circle cx="8" cy="5" r="1.8" />
@@ -504,12 +504,12 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
                         <div style={{ margin: '3px 0', display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                           <span className="lq-tag waiting">#{idx + 1}</span>
                           {isApp && !entry.added_by_admin && (
-                            <span className="lq-tag coming">في الطريق</span>
+                            <span className="lq-tag coming">{t('barberOnWayTag')}</span>
                           )}
                         </div>
                         <div className="lq-cust-sub">
                           <span className="lq-sub-badge">
-                            {entry.added_by_admin ? 'أضافه الأدمن' : (isApp ? 'عبر التطبيق' : 'حضور مباشر')}
+                            {entry.added_by_admin ? t('barberAddedByAdminTag') : (isApp ? t('barberAppClient') : t('barberWalkInClient'))}
                           </span>
                           {phone && (
                             <> · <span className="lq-phone-ltr" dir="ltr">{phone}</span></>
@@ -521,7 +521,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
                     <div className="lq-cust-actions" onPointerDown={(e) => e.stopPropagation()}>
                       {!chairEntry && idx === 0 && (
                         <button className="lq-btn-gold-sm" onClick={() => startSession(entry)}>
-                          ابدأ
+                          {t('barberStartBtn')}
                         </button>
                       )}
 
@@ -529,7 +529,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
                       {isApp && (
                         <button
                           className={`lq-btn-icon-bell ${notifSent === entry.id ? 'sent' : ''}`}
-                          title="إرسال تحديث بالدور للعميل"
+                          title={t('barberNotifyClientHint')}
                           onClick={() => sendQueueNotification(entry, idx)}
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -546,7 +546,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
         )}
 
         <button className="bq-add-client-full" onClick={() => setShowAddModal(true)}>
-          + إضافة عميل للقائمة
+          {t('barberAddClientToQueueBtn')}
         </button>
       </div>
 
@@ -555,7 +555,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
         <div className="bq-slot-hdr">
           <div className="bq-slot-title">
             <span className="bq-slot-num">3</span>
-            <span>في انتظار الدفع</span>
+            <span>{t('barberPayingSlot')}</span>
           </div>
           <span className="bq-slot-badge">{pendingPayment ? 1 : 0}</span>
         </div>
@@ -575,7 +575,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
               <div className="lq-cust-meta">
                 <div className="lq-cust-name">{displayName(pendingPayment)}</div>
                 <div style={{ margin: '3px 0' }}>
-                  <span className="lq-tag done">متجه إلى الكاشير</span>
+                  <span className="lq-tag done">{t('barberHeadingToCashier')}</span>
                 </div>
                 {displayPhone(pendingPayment) && (
                   <div className="lq-cust-sub">
@@ -586,7 +586,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
             </div>
           </div>
         ) : (
-          <div className="lq-empty-box" style={{ margin: '0.4rem 0' }}>لا يوجد عميل متجه للكاشير حالياً</div>
+          <div className="lq-empty-box" style={{ margin: '0.4rem 0' }}>{t('barberNoOneHeadingCashier')}</div>
         )}
       </div>
 
@@ -594,9 +594,9 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
       {undoItem && (
         <div className="lq-undo-toast">
           <div className="lq-undo-left">
-            <span>تم حذف {displayName(undoItem.entry)}</span>
+            <span>{t('barberDeletedToast', { name: displayName(undoItem.entry) })}</span>
             <button className="lq-undo-btn" onClick={handleUndoDelete}>
-              تراجع (Undo)
+              {t('barberUndoBtn')}
             </button>
           </div>
           <div className="lq-undo-progress-bar" />
@@ -608,7 +608,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
         <div className="bp-modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowAddModal(false)}>
           <div className="modal-sheet" style={{ maxWidth: 400, width: '92%', background: '#121212', borderRadius: 20, padding: '1.2rem', border: '1px solid #282828' }}>
             <div className="sheet-title" style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff', marginBottom: '1rem', textAlign: 'center' }}>
-              إضافة عميل إلى طابورك
+              {t('barberAddClientModalTitle')}
             </div>
 
             {addError && (
@@ -620,11 +620,11 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
             <form onSubmit={handleAddClient} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               <div>
                 <label style={{ fontSize: '0.78rem', color: '#888', display: 'block', marginBottom: 4 }}>
-                  اسم العميل (اختياري)
+                  {t('barberOptionalName')}
                 </label>
                 <input
                   type="text"
-                  placeholder="مثال: كريم حسن"
+                  placeholder={t('barberNamePlaceholder')}
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
                   style={{ width: '100%', padding: '0.75rem', background: '#1a1a1a', border: '1px solid #333', borderRadius: 10, color: '#fff', fontSize: '0.88rem', boxSizing: 'border-box' }}
@@ -633,7 +633,7 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
 
               <div>
                 <label style={{ fontSize: '0.78rem', color: '#888', display: 'block', marginBottom: 4 }}>
-                  رقم الهاتف (اختياري للزبائن العاديين)
+                  {t('barberOptionalPhone')}
                 </label>
                 <input
                   type="tel"
@@ -651,14 +651,14 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
                   onClick={() => setShowAddModal(false)}
                   style={{ flex: 1, padding: '0.75rem', background: '#222', color: '#aaa', border: 'none', borderRadius: 10, fontWeight: 700, cursor: 'pointer' }}
                 >
-                  إلغاء
+                  {t('barberCancelBtn')}
                 </button>
                 <button
                   type="submit"
                   disabled={adding}
                   style={{ flex: 2, padding: '0.75rem', background: 'linear-gradient(135deg, #c9a84c, #8b6914)', color: '#000', border: 'none', borderRadius: 10, fontWeight: 800, cursor: 'pointer' }}
                 >
-                  {adding ? 'جاري الإضافة...' : 'تأكيد الإضافة'}
+                  {adding ? t('barberAddingBtn') : t('barberConfirmAddBtn')}
                 </button>
               </div>
             </form>
