@@ -132,9 +132,9 @@ export default function BarberHomeTab({ user, onNavigateTab }) {
       {/* Greeting */}
       <div className="bh-greeting">
         <h1 className="bh-greeting-title">
-          مساء النور، <span>{firstName}</span>
+          {t('barberGoodEvening')} <span>{firstName}</span>
         </h1>
-        <div className="bh-greeting-sub">جاهز ليوم شغل جديد</div>
+        <div className="bh-greeting-sub">{t('barberGreetingSub')}</div>
       </div>
 
       {/* Available Toggle Card */}
@@ -142,10 +142,10 @@ export default function BarberHomeTab({ user, onNavigateTab }) {
         <div className="bh-avail-info">
           <div className="bh-avail-title">
             <span className={`bh-avail-dot ${isActive ? 'on' : 'off'}`} />
-            {isActive ? 'متاح للعملاء' : 'في استراحة (غير متاح)'}
+            {isActive ? t('barberAvailableClients') : t('barberOnBreak')}
           </div>
           <div className="bh-avail-sub">
-            {isActive ? 'العملاء يمكنهم الانضمام لطابورك' : 'أوقف الاستقبال عند أخذ استراحة'}
+            {isActive ? t('barberCanJoinQueue') : t('barberStopReceiving')}
           </div>
         </div>
         <label className="bh-switch">
@@ -157,22 +157,22 @@ export default function BarberHomeTab({ user, onNavigateTab }) {
       {/* Next Client / Active Chair Card */}
       <div className={`bh-next-card ${chairClient ? 'chair-active' : ''}`}>
         <div className="bh-next-label">
-          {chairClient ? 'على الكرسي الآن' : 'العميل التالي'}
+          {chairClient ? t('barberOnChairNow') : t('barberNextInQueue')}
         </div>
         <div className="bh-next-row">
           <span className="bh-next-name">
             {chairClient
               ? chairClient.name
-              : (nextClient ? nextClient.name : 'لا يوجد أحد بالانتظار')}
+              : (nextClient ? nextClient.name : t('barberNoOneWaiting'))}
           </span>
           {chairClient ? (
             <span className="bh-next-badge on-chair">
-              {chairClient.isApp ? 'تطبيق' : 'حضور مباشر'}
+              {chairClient.isApp ? t('barberAppClient') : t('barberWalkInClient')}
             </span>
           ) : (
             nextClient && (
               <span className="bh-next-badge">
-                {nextClient.isApp ? 'تطبيق' : 'حضوري'}
+                {nextClient.isApp ? t('barberAppClient') : t('barberWalkInClient')}
               </span>
             )
           )}
@@ -183,7 +183,7 @@ export default function BarberHomeTab({ user, onNavigateTab }) {
           disabled={!chairClient && !nextClient}
           style={{ opacity: (chairClient || nextClient) ? 1 : 0.6 }}
         >
-          {chairClient ? 'متابعة الجلسة في الطابور' : 'ابدأ القص'}
+          {chairClient ? t('barberContinueQueue') : t('barberStartCutting')}
         </button>
       </div>
 
@@ -191,25 +191,25 @@ export default function BarberHomeTab({ user, onNavigateTab }) {
       <div className="bh-stats-row">
         <div className="bh-stat-card">
           <span className="bh-stat-val">{todayCuts}</span>
-          <span className="bh-stat-label">قصات اليوم</span>
+          <span className="bh-stat-label">{t('barberTodayCuts')}</span>
         </div>
         <div className="bh-stat-card">
-          <span className="bh-stat-val">28د</span>
-          <span className="bh-stat-label">متوسط الوقت</span>
+          <span className="bh-stat-val">28{t('barberMinutesShort')}</span>
+          <span className="bh-stat-label">{t('barberAvgTime')}</span>
         </div>
         <div className="bh-stat-card">
           <span className="bh-stat-val">{ratingVal.toFixed(1)}</span>
-          <span className="bh-stat-label">التقييم</span>
+          <span className="bh-stat-label">{t('barberAvgRating')}</span>
         </div>
       </div>
 
       {/* 2 Action Buttons */}
       <div className="bh-actions-row">
         <button className="bh-action-btn" onClick={() => onNavigateTab('queue', { openAdd: true })}>
-          + إضافة عميل
+          {t('barberAddClientAction')}
         </button>
         <button className="bh-action-btn" onClick={() => onNavigateTab('profile', { openAddPost: true })}>
-          + منشور جديد
+          {t('barberNewPostAction')}
         </button>
       </div>
 
@@ -217,22 +217,22 @@ export default function BarberHomeTab({ user, onNavigateTab }) {
       <div className="bh-ratings-section">
         <div className="bh-ratings-hdr">
           <div className="bh-ratings-title-row">
-            <span className="bh-ratings-title">تقييمات العملاء</span>
-            <span className="bh-ratings-count">({ratingsList.length} تقييم)</span>
+            <span className="bh-ratings-title">{t('barberClientReviews')}</span>
+            <span className="bh-ratings-count">({ratingsList.length})</span>
           </div>
           {ratingsList.length > 1 && (
             <button
               className="bh-view-more-btn"
               onClick={() => setShowAllRatings(!showAllRatings)}
             >
-              {showAllRatings ? 'عرض أقل ↑' : 'عرض الكل ↓'}
+              {showAllRatings ? t('barberViewLess') : t('barberViewAll')}
             </button>
           )}
         </div>
 
         {ratingsList.length === 0 ? (
           <div className="bh-rating-empty">
-            لا توجد تقييمات مسجلة بعد لهذا الحساب.
+            {t('barberNoRatingsYet')}
           </div>
         ) : (
           <div className="bh-ratings-list">
@@ -281,7 +281,7 @@ export default function BarberHomeTab({ user, onNavigateTab }) {
                   <p className="bh-rating-comment">"{r.comment}"</p>
                 ) : (
                   <p className="bh-rating-comment muted">
-                    (تقييم {r.rating} نجوم بدون تعليق مكتوب)
+                    {t('barberRatingNoComment', { n: r.rating || 5 })}
                   </p>
                 )}
               </div>
