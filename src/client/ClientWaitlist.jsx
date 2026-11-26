@@ -146,6 +146,11 @@ export default function ClientWaitlist({ user }) {
 
   if (loading) return <ClientWaitlistSkeleton />
 
+  // Check if the client is already in ANY barber's queue
+  const alreadyInAnyQueue = Object.values(waitlistMap).some(
+    info => info?.myEntry?.status === 'waiting' || info?.myEntry?.status === 'in_service'
+  )
+
   return (
     <div className="cw-page">
       <div className="cw-header">
@@ -166,6 +171,8 @@ export default function ClientWaitlist({ user }) {
           const inMyQueue = myEntry?.status === 'waiting'
           const onChair   = myEntry?.status === 'in_service'
           const isActive  = b.is_active
+          // Disable join if already in another barber's queue
+          const isOtherBarberBlocked = alreadyInAnyQueue && !inMyQueue && !onChair
 
           return (
             <div key={b.id} className={`cw-barber-card ${!isActive ? 'inactive' : ''}`}>
@@ -192,6 +199,10 @@ export default function ClientWaitlist({ user }) {
                 ) : inMyQueue ? (
                   <button className="cw-leave-btn" onClick={() => leaveWaitlist(info.myEntry.id)}>
                     {t('leaveQueue')}
+                  </button>
+                ) : isOtherBarberBlocked ? (
+                  <button className="cw-join-btn" disabled style={{ opacity: 0.35, cursor: 'not-allowed' }}>
+                    {t('alreadyInQueue')}
                   </button>
                 ) : (
                   <button className="cw-join-btn" disabled={joining === b.id} onClick={() => joinWaitlist(b)}>

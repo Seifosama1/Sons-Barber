@@ -121,6 +121,7 @@ const translations = {
     toastYouNext:    'تم تسجيلك! أنت التالي في الدور',
     toastWillNotify: 'تم تسجيلك! سنبلغك عندما يحين دورك',
     toastError:      'حدث خطأ، حاول مرة أخرى',
+    alreadyInQueue:  'أنت مسجل بطابور آخر',
 
     // ── Barbers tab ──
     barbersTitle:    'الحلاقون',
@@ -324,6 +325,7 @@ const translations = {
     toastYouNext:    'Done! You are next in turn',
     toastWillNotify: 'Done! You will be notified when next in turn',
     toastError:      'An error occurred, please try again',
+    alreadyInQueue:  'You\'re in another queue',
 
     // ── Barbers tab ──
     barbersTitle:    'Barbers',
