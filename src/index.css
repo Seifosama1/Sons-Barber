@@ -13,6 +13,9 @@ body,
   width: 100%;
   /* Prevent horizontal scroll on all devices */
   overflow-x: hidden;
+  /* Hardware accelerated rendering for smooth 60fps scrolling on budget phones */
+  -webkit-overflow-scrolling: touch;
+  touch-action: manipulation;
 }
 
 body {
@@ -20,9 +23,45 @@ body {
   background: #0d0d0d;
   color: #fff;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   overflow-x: hidden;
   /* Mobile-safe viewport */
   min-height: 100dvh;
+}
+
+/* Optimize low-end GPU composition: reduce heavy blur cost on low-spec devices */
+@media (max-width: 768px) {
+  * {
+    /* Avoid expensive subpixel text antialiasing re-layouts */
+    box-sizing: border-box;
+  }
+
+  /* Replace heavy backdrop-filter blurs on budget devices with smooth solid translucency */
+  .client-nav,
+  .admin-topbar,
+  .admin-nav,
+  .auth-card,
+  .cs-header {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(13, 13, 13, 0.98) !important;
+  }
+
+  /* GPU layer promote navigation bars and modals for zero jank during scrolling */
+  .client-nav,
+  .admin-nav,
+  .admin-topbar {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  /* Suppress multi-layer heavy blurs on background decorative circles */
+  .auth-bg .bg-circle,
+  .lp-bg .lp-circle {
+    filter: blur(40px) !important;
+    will-change: auto !important;
+  }
 }
 
 /* Prevent inputs from zooming on iOS (needs font-size >= 16px) */
@@ -35,14 +74,3 @@ input, textarea, select { font-size: max(16px, 1rem); }
 ::-webkit-scrollbar-track { background: #111; }
 ::-webkit-scrollbar-thumb { background: #c9a84c44; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #c9a84c88; }
-
-/* ── Performance: GPU layer for all fixed/sticky elements ── */
-*[style*="position: fixed"],
-.client-nav, .barber-nav {
-  backface-visibility: hidden;
-}
-
-/* ── Performance: font rendering ── */
-body {
-  text-rendering: optimizeSpeed;
-}
