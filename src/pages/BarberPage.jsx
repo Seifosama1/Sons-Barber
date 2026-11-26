@@ -1,41 +1,48 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useLang } from '../context/LanguageContext'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
-import { registerBarberPush } from '../lib/usePushNotifications'
+import { requestNotificationPermission, showNativeNotification } from '../lib/nativeNotification'
 import BarberHomeTab from '../barber/BarberHomeTab'
 import BarberScheduleTab from '../barber/BarberScheduleTab'
 import BarberQueueTab from '../barber/BarberQueueTab'
 import BarberProfileTab from '../barber/BarberProfileTab'
+import BarberSettings from '../barber/BarberSettings'
 import '../styles/barber.css'
 
 export default function BarberPage() {
   const { user, logout } = useAuth()
-  const [tab, setTab] = useState('home') // 'home' | 'schedule' | 'queue' | 'profile'
+  const { t } = useLang()
+  const [tab, setTab] = useState('home') // 'home' | 'schedule' | 'queue' | 'profile' | 'settings'
   const [waitingCount, setWaitingCount] = useState(0)
   const [hasNewAppt, setHasNewAppt] = useState(false)
   const [actionParams, setActionParams] = useState({})
 
   useEffect(() => {
     if (!user?.id) return
+    requestNotificationPermission()
     fetchWaitingCount()
     checkNewAppointments()
-    // Register push notifications for barber (ask permission once)
-    registerBarberPush(user.id)
-
-    // Listen for messages from service worker (notification tap -> open queue tab)
-    function handleSwMessage(event) {
-      if (event.data?.type === 'OPEN_TAB' && event.data?.tab) {
-        setTab(event.data.tab)
-      }
-    }
-    navigator.serviceWorker?.addEventListener('message', handleSwMessage)
-    return () => navigator.serviceWorker?.removeEventListener('message', handleSwMessage)
   }, [user?.id])
 
-  // Realtime updates on waitlist for barber
-  useRealtime('waitlist', {}, () => {
+  // Realtime updates on waitlist for barber & native notification if client joins
+  useRealtime('waitlist', {}, (payload) => {
     fetchWaitingCount()
+    if (
+      payload?.eventType === 'INSERT' &&
+      payload?.new?.barber_id === user?.id &&
+      payload?.new?.status === 'waiting'
+    ) {
+      const allowed = localStorage.getItem(`barber_notif_queue_${user?.id}`) !== 'false'
+      if (allowed) {
+        showNativeNotification({
+          title: 'عميل جديد انضم لطابورك! ✂️',
+          body: 'انضم عميل جديد لقائمة الانتظار المباشرة الخاصة بك.',
+          tag: `barber-queue-${payload.new.id}`
+        })
+      }
+    }
   })
 
   // Realtime updates on appointments for red dot alert
@@ -85,16 +92,40 @@ export default function BarberPage() {
           </div>
           <span className="barber-brand-text">Sons Barber</span>
         </div>
-        <div
-          className="barber-topbar-avatar"
-          onClick={() => setTab('profile')}
-          title="الملف الشخصي"
-        >
-          {user?.avatarUrl ? (
-            <img src={user.avatarUrl} alt={user.name} />
-          ) : (
-            <span>{initial}</span>
-          )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <button
+            onClick={() => setTab('settings')}
+            title={t('settingsTitle')}
+            style={{
+              background: '#161616',
+              border: '1px solid #282828',
+              borderRadius: '50%',
+              width: 36,
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: tab === 'settings' ? 'var(--gold, #c9a84c)' : '#888',
+              transition: 'all 0.2s',
+            }}
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </button>
+          <div
+            className="barber-topbar-avatar"
+            onClick={() => setTab('profile')}
+            title={t('barberProfileTab')}
+          >
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt={user.name} />
+            ) : (
+              <span>{initial}</span>
+            )}
+          </div>
         </div>
       </header>
 
@@ -123,6 +154,13 @@ export default function BarberPage() {
             user={user}
             initialOpenAddPost={actionParams.openAddPost}
             onResetInitialOpenAddPost={() => setActionParams(prev => ({ ...prev, openAddPost: false }))}
+            onOpenSettings={() => setTab('settings')}
+          />
+        )}
+        {tab === 'settings' && (
+          <BarberSettings
+            user={user}
+            onBack={() => setTab('profile')}
           />
         )}
       </main>
@@ -135,7 +173,7 @@ export default function BarberPage() {
             onClick={() => setTab('home')}
           >
             <HomeIcon />
-            <span>الرئيسية</span>
+            <span>{t('barberHomeTab')}</span>
           </button>
 
           <button
@@ -143,7 +181,7 @@ export default function BarberPage() {
             onClick={() => setTab('queue')}
           >
             <QueueIcon />
-            <span>طابوري</span>
+            <span>{t('barberQueueTab')}</span>
             {waitingCount > 0 && <span className="barber-nav-dot" />}
           </button>
 
@@ -156,16 +194,16 @@ export default function BarberPage() {
             }}
           >
             <CalendarIcon />
-            <span>جدولي</span>
+            <span>{t('barberScheduleTab')}</span>
             {hasNewAppt && <span className="barber-nav-dot" style={{ background: '#ef4444' }} />}
           </button>
 
           <button
-            className={`nav-item ${tab === 'profile' ? 'active' : ''}`}
+            className={`nav-item ${tab === 'profile' || tab === 'settings' ? 'active' : ''}`}
             onClick={() => setTab('profile')}
           >
             <PersonIcon />
-            <span>ملفي</span>
+            <span>{t('barberProfileTab')}</span>
           </button>
         </div>
       </nav>
