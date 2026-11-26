@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { serviceSelect } from '../lib/serviceDb'
 import { useRealtime } from '../lib/useRealtime'
+import { useLang } from '../context/LanguageContext'
+import { BarberScheduleSkeleton } from '../components/ClientSkeletons'
 
 export default function BarberScheduleTab({ user }) {
+  const { t } = useLang()
   const DAYS_AR = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
   const [days] = useState(() =>
     Array.from({ length: 7 }, (_, i) => {
@@ -88,6 +91,8 @@ export default function BarberScheduleTab({ user }) {
     const m = String(d.getMinutes()).padStart(2, '0')
     return `${h}:${m}`
   }
+
+  if (loading) return <BarberScheduleSkeleton />
 
   return (
     <div className="bs-container">
