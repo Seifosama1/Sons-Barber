@@ -30,22 +30,11 @@ export default function BarberSettings({ user, onBack }) {
   // Toast
   const [toast, setToast] = useState(null)
 
-  // Load barber privacy setting from DB profile
+  // Load barber privacy setting
   useEffect(() => {
     if (!user?.id) return
-    supabase
-      .from('profiles')
-      .select('hide_queue_count')
-      .eq('id', user.id)
-      .single()
-      .then(({ data }) => {
-        if (data?.hide_queue_count !== undefined) {
-          setHideQueueCount(!!data.hide_queue_count)
-        } else {
-          // Fallback to local storage if DB column is not yet migrated
-          setHideQueueCount(localStorage.getItem(`barber_hide_queue_${user.id}`) === 'true')
-        }
-      })
+    const stored = localStorage.getItem(`barber_hide_queue_${user.id}`)
+    setHideQueueCount(stored === 'true')
   }, [user?.id])
 
   function handleToggleQueueNotif(val) {
@@ -56,11 +45,6 @@ export default function BarberSettings({ user, onBack }) {
   async function handleToggleHideQueueCount(val) {
     setHideQueueCount(val)
     localStorage.setItem(`barber_hide_queue_${user?.id}`, val.toString())
-    setSavingPrivacy(true)
-    try {
-      await supabase.from('profiles').update({ hide_queue_count: val }).eq('id', user.id)
-    } catch {}
-    setSavingPrivacy(false)
     setToast({ msg: val ? (t('settingsBarberHideQueueCount') + ': ' + t('settingsActiveNow')) : t('settingsPassUpdated'), type: 'success' })
   }
 
