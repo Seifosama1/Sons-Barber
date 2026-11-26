@@ -178,6 +178,17 @@ const translations = {
     settingsNotifSaveFailed:    'فشل حفظ الإعدادات',
     settingsNotifEnabled:       'تم تفعيل الإشعار',
     settingsNotifDisabled:      'تم إيقاف الإشعار',
+
+    // ── Barber Profile View Modal (client side) ──
+    bpvPosts:          'منشورات',
+    bpvRating:         'التقييم',
+    bpvReviews:        'مراجعة',
+    bpvGallery:        'المعرض',
+    bpvNoPosts:        'لا توجد منشورات حتى الآن',
+    bpvZoomIn:         'تكبير',
+    bpvZoomOut:        'تصغير',
+    bpvDefaultCaption: 'قصة شعر مميزة',
+
     settingsContactUs:  'تواصل معنا',
     settingsContactDesc:'عندك سؤال أو ملاحظة؟ ابعتها لنا مباشرة على واتساب.',
     settingsContactPlaceholder: 'اكتب رسالتك أو سؤالك...',
@@ -370,6 +381,17 @@ const translations = {
     settingsNotifSaveFailed:    'Failed to save settings',
     settingsNotifEnabled:       'Notification enabled',
     settingsNotifDisabled:      'Notification disabled',
+
+    // ── Barber Profile View Modal (client side) ──
+    bpvPosts:          'Posts',
+    bpvRating:         'Rating',
+    bpvReviews:        'Reviews',
+    bpvGallery:        'Gallery',
+    bpvNoPosts:        'No posts yet',
+    bpvZoomIn:         'Zoom In',
+    bpvZoomOut:        'Zoom Out',
+    bpvDefaultCaption: 'A great haircut',
+
     settingsContactUs:  'Contact Us',
     settingsContactDesc:'Have a question or feedback? Send it to us directly on WhatsApp.',
     settingsContactPlaceholder: 'Write your message or question...',

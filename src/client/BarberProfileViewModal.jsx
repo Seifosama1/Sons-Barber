@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { serviceUpdate } from '../lib/serviceDb'
+import { useLang } from '../context/LanguageContext'
 
 // Helper to parse likes and clean display caption
 export function parsePostLikes(rawCaption) {
@@ -26,6 +27,7 @@ export function formatPostWithLikes(displayCaption, uids) {
 }
 
 export default function BarberProfileViewModal({ barber, onClose, currentUserId }) {
+  const { t, lang } = useLang()
   const [profile, setProfile] = useState(barber || {})
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -85,7 +87,7 @@ export default function BarberProfileViewModal({ barber, onClose, currentUserId 
 
   async function toggleLike(post) {
     if (!currentUserId) {
-      alert('يرجى تسجيل الدخول لتسجيل الإعجاب')
+      alert(lang === 'en' ? 'Please log in to like posts' : 'يرجى تسجيل الدخول لتسجيل الإعجاب')
       return
     }
 
@@ -159,7 +161,9 @@ export default function BarberProfileViewModal({ barber, onClose, currentUserId 
   function formatPostDate(iso) {
     if (!iso) return ''
     const d = new Date(iso)
-    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+    const months = lang === 'en'
+      ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+      : ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
     return `${d.getDate()} ${months[d.getMonth()]}`
   }
 
@@ -274,7 +278,7 @@ export default function BarberProfileViewModal({ barber, onClose, currentUserId 
           <div style={{ display: 'flex', flex: 1, justifyContent: 'space-around', textAlign: 'center' }}>
             <div>
               <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#fff' }}>{posts.length}</div>
-              <div style={{ fontSize: '0.72rem', color: '#888' }}>منشورات</div>
+              <div style={{ fontSize: '0.72rem', color: '#888' }}>{t('bpvPosts')}</div>
             </div>
             <div>
               <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#c9a84c', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
@@ -283,13 +287,13 @@ export default function BarberProfileViewModal({ barber, onClose, currentUserId 
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#888' }}>التقييم</div>
+              <div style={{ fontSize: '0.72rem', color: '#888' }}>{t('bpvRating')}</div>
             </div>
             <div>
               <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#fff' }}>
                 {profile.rating_count || 0}
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#888' }}>مراجعة</div>
+              <div style={{ fontSize: '0.72rem', color: '#888' }}>{t('bpvReviews')}</div>
             </div>
           </div>
         </div>
@@ -333,7 +337,7 @@ export default function BarberProfileViewModal({ barber, onClose, currentUserId 
                 gap: 5,
               }}
             >
-              <span>واتساب WhatsApp</span>
+              <span>WhatsApp</span>
             </a>
           )}
 
@@ -405,7 +409,7 @@ export default function BarberProfileViewModal({ barber, onClose, currentUserId 
             <rect x="14" y="14" width="7" height="7" />
             <rect x="3" y="14" width="7" height="7" />
           </svg>
-          <span>المعرض ({posts.length})</span>
+              <span>{t('bpvGallery')} ({posts.length})</span>
         </div>
 
         {/* 3-Column Instagram Style Posts Grid */}
@@ -415,7 +419,7 @@ export default function BarberProfileViewModal({ barber, onClose, currentUserId 
           </div>
         ) : posts.length === 0 ? (
           <div style={{ textAlign: 'center', color: '#666', padding: '2.5rem 0' }}>
-            لا توجد منشورات حتى الآن
+            {t('bpvNoPosts')}
           </div>
         ) : (
           <div
@@ -631,7 +635,7 @@ export default function BarberProfileViewModal({ barber, onClose, currentUserId 
                   <line x1="11" y1="8" x2="11" y2="14" />
                   <line x1="8" y1="11" x2="14" y2="11" />
                 </svg>
-                <span>{zoomScale > 1 ? 'تصغير' : 'تكبير Zoom'}</span>
+                <span>{zoomScale > 1 ? t('bpvZoomOut') : t('bpvZoomIn')}</span>
               </button>
             )}
 
@@ -733,7 +737,7 @@ export default function BarberProfileViewModal({ barber, onClose, currentUserId 
               }}
             >
               <div style={{ color: '#eee', fontSize: '0.88rem', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {previewMedia.caption || 'قصة شعر مميزة'}
+                {previewMedia.caption || t('bpvDefaultCaption')}
               </div>
 
               {previewMedia.post && (
