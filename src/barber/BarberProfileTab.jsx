@@ -196,10 +196,10 @@ export default function BarberProfileTab({ user, initialOpenAddPost, onResetInit
 
   async function handleDeletePost(postId) {
     const ok = await askConfirm({
-      title: 'حذف المنشور',
-      message: 'هل أنت متأكد من حذف هذا المنشور من معرض أعمالك؟',
-      confirmText: 'نعم، حذف',
-      cancelText: 'إلغاء',
+      title: t('barberDeletePostTitle'),
+      message: t('barberDeletePostConfirm'),
+      confirmText: t('barberConfirmDeleteYes'),
+      cancelText: t('barberCancelBtn'),
       type: 'danger',
     })
     if (!ok) return
@@ -210,8 +210,10 @@ export default function BarberProfileTab({ user, initialOpenAddPost, onResetInit
   function formatPostDate(iso) {
     if (!iso) return ''
     const d = new Date(iso)
-    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
-    return `${d.getDate()} ${months[d.getMonth()]}`
+    const monthsAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+    const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const m = (t('months') || (document.documentElement.lang === 'en' ? monthsEn : monthsAr))[d.getMonth()]
+    return `${d.getDate()} ${m}`
   }
 
   if (loading) return <BarberProfileSkeleton />
@@ -247,7 +249,7 @@ export default function BarberProfileTab({ user, initialOpenAddPost, onResetInit
           <button
             className="bp-avatar-add-btn"
             onClick={() => avatarFileRef.current?.click()}
-            title="تغيير الصورة"
+            title={t('barberChangeAvatar')}
           >
             +
           </button>
@@ -278,13 +280,13 @@ export default function BarberProfileTab({ user, initialOpenAddPost, onResetInit
       {/* Bio & Social Links Card */}
       <div className="bp-bio-card">
         <div className="bp-bio-top">
-          <span className="bp-bio-title">نبذة عني</span>
+          <span className="bp-bio-title">{t('barberBioAboutMe')}</span>
           <button className="bp-bio-edit-btn" onClick={() => setShowEditBioModal(true)}>
-            تعديل
+            {t('barberEditBio')}
           </button>
         </div>
         <p className="bp-bio-text">
-          {profile.bio || 'حلاق محترف، متخصص في القصات الكلاسيكية والعصرية وتغذية اللحية.'}
+          {profile.bio || t('barberDefaultBio')}
         </p>
 
         <div className="bp-social-pills">
@@ -316,9 +318,9 @@ export default function BarberProfileTab({ user, initialOpenAddPost, onResetInit
       {/* Portfolio Section */}
       <div className="bp-portfolio-section">
         <div className="bp-portfolio-header">
-          <span className="bp-portfolio-title">معرض الأعمال</span>
+          <span className="bp-portfolio-title">{t('barberPosts')}</span>
           <button className="bp-add-post-btn" onClick={() => setShowAddPostModal(true)}>
-            + إضافة منشور
+            {t('barberAddPost')}
           </button>
         </div>
 
@@ -328,7 +330,7 @@ export default function BarberProfileTab({ user, initialOpenAddPost, onResetInit
           </div>
         ) : posts.length === 0 ? (
           <div className="empty-state" style={{ padding: '2rem 0', color: '#666', textAlign: 'center' }}>
-            <p>لا توجد منشورات حتى الآن<br />أضف أول صورة أو فيديو لأعمالك!</p>
+            <p>{t('barberNoPosts')}</p>
           </div>
         ) : (
           <div className="bp-posts-grid">
@@ -355,7 +357,7 @@ export default function BarberProfileTab({ user, initialOpenAddPost, onResetInit
                         e.stopPropagation()
                         handleDeletePost(post.id)
                       }}
-                      title="حذف المنشور"
+                      title={t('barberDeletePostTitle')}
                     >
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="3 6 5 6 21 6" />
@@ -365,7 +367,7 @@ export default function BarberProfileTab({ user, initialOpenAddPost, onResetInit
                       </svg>
                     </button>
                     <span className="bp-post-type-tag">
-                      {isVideo ? '▶ فيديو' : 'صورة'}
+                      {isVideo ? t('barberVideoTag') : t('barberPhotoTag')}
                     </span>
                   </div>
                   <div className="bp-post-footer">
@@ -387,16 +389,16 @@ export default function BarberProfileTab({ user, initialOpenAddPost, onResetInit
           className="bp-logout-btn"
           onClick={async () => {
             const ok = await askConfirm({
-              title: 'تسجيل الخروج',
-              message: 'هل أنت متأكد من رغبتك في تسجيل الخروج من حسابك؟',
-              confirmText: 'نعم، تسجيل الخروج',
-              cancelText: 'إلغاء',
+              title: t('barberLogoutTitle'),
+              message: t('barberLogoutConfirm'),
+              confirmText: t('barberLogoutTitle'),
+              cancelText: t('barberCancelBtn'),
               type: 'danger',
             })
             if (ok) logout()
           }}
         >
-          تسجيل الخروج ➔
+          {t('barberLogoutBtn')}
         </button>
       </div>
 
@@ -413,11 +415,11 @@ export default function BarberProfileTab({ user, initialOpenAddPost, onResetInit
           </div>
           <div className="bp-avatar-modal-actions">
             <button className="bp-modal-btn edit" onClick={() => { avatarFileRef.current?.click(); setShowAvatarModal(false); }}>
-              تغيير الصورة
+              {t('barberChangeAvatar')}
             </button>
             {profile.avatar_url && (
               <button className="bp-modal-btn delete" onClick={handleDeleteAvatar}>
-                حذف الصورة
+                {t('barberDeleteAvatar')}
               </button>
             )}
           </div>
