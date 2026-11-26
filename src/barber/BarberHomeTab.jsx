@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import { supabaseAdmin } from '../lib/supabase'
 import { serviceSelect } from '../lib/serviceDb'
 import { useRealtime } from '../lib/useRealtime'
 
