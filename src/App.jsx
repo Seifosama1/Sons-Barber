@@ -1,18 +1,16 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import AuthPage from './pages/AuthPage'
+import AdminPage from './pages/AdminPage'
+import ClientPage from './pages/ClientPage'
+import BarberPage from './pages/BarberPage'
+import LanguagePicker from './pages/LanguagePicker'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { LanguageProvider, useLang } from './context/LanguageContext'
 import { ConfirmProvider } from './context/ConfirmContext'
 import LoadingScreen from './components/LoadingScreen'
 import NoInternetModal from './components/NoInternetModal'
-import LanguagePicker from './pages/LanguagePicker'
 import './styles/spinner.css'
-
-// Lazy-load heavy page bundles — they only download when the user reaches them
-const AuthPage   = lazy(() => import('./pages/AuthPage'))
-const AdminPage  = lazy(() => import('./pages/AdminPage'))
-const ClientPage = lazy(() => import('./pages/ClientPage'))
-const BarberPage = lazy(() => import('./pages/BarberPage'))
 
 function ProtectedRoute({ children, role }) {
   const { user } = useAuth()
@@ -29,8 +27,12 @@ function AppRoutes() {
   const { user, loading } = useAuth()
   const { syncLangFromProfile } = useLang()
 
-  // Sync language from DB when user logs in
-  if (user?.id) syncLangFromProfile(user.id)
+  // Sync language from DB when user logs in safely in an effect
+  useEffect(() => {
+    if (user?.id) {
+      syncLangFromProfile(user.id)
+    }
+  }, [user?.id])
 
   if (loading) {
     return <LoadingScreen />
@@ -44,15 +46,13 @@ function AppRoutes() {
   }
 
   return (
-    <Suspense fallback={<LoadingScreen />}>
-      <Routes>
-        <Route path="/" element={homeRedirect()} />
-        <Route path="/admin/*" element={<ProtectedRoute role="admin"><AdminPage /></ProtectedRoute>} />
-        <Route path="/client/*" element={<ProtectedRoute role="client"><ClientPage /></ProtectedRoute>} />
-        <Route path="/barber/*" element={<ProtectedRoute role="barber"><BarberPage /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
+    <Routes>
+      <Route path="/" element={homeRedirect()} />
+      <Route path="/admin/*" element={<ProtectedRoute role="admin"><AdminPage /></ProtectedRoute>} />
+      <Route path="/client/*" element={<ProtectedRoute role="client"><ClientPage /></ProtectedRoute>} />
+      <Route path="/barber/*" element={<ProtectedRoute role="barber"><BarberPage /></ProtectedRoute>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
