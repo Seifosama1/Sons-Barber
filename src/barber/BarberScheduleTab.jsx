@@ -98,15 +98,15 @@ export default function BarberScheduleTab({ user }) {
     <div className="bs-container">
       {/* Header */}
       <div className="bs-header">
-        <h1 className="bs-title">جدولي</h1>
-        <span className="bs-readonly-pill">عرض فقط</span>
+        <h1 className="bs-title">{t('barberScheduleTitle')}</h1>
+        <span className="bs-readonly-pill">{t('barberReadOnly')}</span>
       </div>
 
       {/* Shop Hours Card */}
       <div className="bs-shop-card">
         <div className="bs-shop-status">
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#2ecc71', display: 'inline-block' }} />
-          <span>المحل مفتوح</span>
+          <span>{t('barberShopOpenStatus')}</span>
         </div>
         <div className="bs-shop-hours">
           {shopHours.open} ~ {shopHours.close}
@@ -118,6 +118,8 @@ export default function BarberScheduleTab({ user }) {
         {days.map((d, i) => {
           const isSel = d.toDateString() === selDay.toDateString()
           const hasAppt = daysWithAppts.has(d.toDateString())
+          const DAYS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+          const dayName = t('lang') === 'en' || document.documentElement.lang === 'en' ? DAYS_EN[d.getDay()] : DAYS_AR[d.getDay()]
           return (
             <button
               key={i}
@@ -125,7 +127,7 @@ export default function BarberScheduleTab({ user }) {
               onClick={() => setSelDay(d)}
               style={{ position: 'relative' }}
             >
-              <span className="bs-day-name">{DAYS_AR[d.getDay()]}</span>
+              <span className="bs-day-name">{dayName}</span>
               <span className="bs-day-num">{d.getDate()}</span>
               {hasAppt && (
                 <span
@@ -148,7 +150,7 @@ export default function BarberScheduleTab({ user }) {
       </div>
 
       {/* Bookings Section */}
-      <div className="bs-section-title">حجوزات اليوم</div>
+      <div className="bs-section-title">{t('barberTodayAppts')}</div>
 
       {loading ? (
         <div className="empty-state" style={{ padding: '2rem 0' }}>
@@ -156,7 +158,7 @@ export default function BarberScheduleTab({ user }) {
         </div>
       ) : appts.length === 0 ? (
         <div className="empty-state" style={{ padding: '2rem 0', color: '#666', textAlign: 'center' }}>
-          <p>لا توجد حجوزات في هذا اليوم</p>
+          <p>{t('barberNoApptsDay')}</p>
         </div>
       ) : (
         <div className="bs-appts-list">
@@ -206,7 +208,7 @@ export default function BarberScheduleTab({ user }) {
                         fontWeight: 700,
                       }}
                     >
-                      {a.status === 'confirmed' ? 'مؤكد' : 'معلق'}
+                      {a.status === 'confirmed' ? t('statusConfirmed') : t('statusPending')}
                     </span>
                   </div>
 
@@ -216,7 +218,7 @@ export default function BarberScheduleTab({ user }) {
                     </div>
                   )}
 
-                  <span className="bs-appt-service">{a.services?.name || 'حلاقة'}</span>
+                  <span className="bs-appt-service">{a.services?.name || (t('service') || 'حلاقة')}</span>
                 </div>
               </div>
 
@@ -230,7 +232,7 @@ export default function BarberScheduleTab({ user }) {
       )}
 
       <div className="bs-footer-note">
-        الجدول يتم تعديله من الإدارة فقط
+        {t('barberAdminOnlySchedule')}
       </div>
     </div>
   )
