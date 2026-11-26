@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
+import { notifyClientPush } from '../lib/usePushNotifications'
 import ServicesSection from './ServicesSection'
 
 const DAYS_AR   = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت']
@@ -170,15 +171,24 @@ export default function DashTab({ user, onNavigateTab }) {
     // Send notification to client
     if (req?.client?.id) {
       const isApproved = action === 'confirmed'
+      const notifTitle = isApproved ? 'تم قبول حجزك' : 'تم رفض حجزك'
+      const notifBody  = isApproved
+        ? `تم تأكيد موعدك مع ${req.barber?.name || 'الحلاق'}. نراك قريباً!`
+        : `للأسف تم رفض طلب الحجز. للاستفسار تواصل معنا على: ${adminPhone}`
       await supabase.from('notifications').insert({
         target_user_id: req.client.id,
-        title: isApproved ? 'تم قبول حجزك' : 'تم رفض حجزك',
-        body: isApproved
-          ? `تم تأكيد موعدك مع ${req.barber?.name || 'الحلاق'}. نراك قريباً!`
-          : `للأسف تم رفض طلب الحجز. للاستفسار تواصل معنا على: ${adminPhone}`,
+        title: notifTitle,
+        body: notifBody,
         type: isApproved ? 'booking_approved' : 'booking_rejected',
         action_url: isApproved ? null : adminPhone,
         sent_by: (await supabase.auth.getUser()).data.user?.id,
+      })
+      // Also send native push notification (works when app is closed)
+      notifyClientPush({
+        clientId: req.client.id,
+        title:    notifTitle,
+        body:     notifBody,
+        tag:      `booking-${req.id}`,
       })
     }
 

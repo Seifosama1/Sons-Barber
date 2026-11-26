@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { useLang } from '../context/LanguageContext'
+import { notifyBarberQueueJoin } from '../lib/usePushNotifications'
 import Toast from '../components/Toast'
 import { ClientWaitlistSkeleton } from '../components/ClientSkeletons'
 
@@ -92,6 +93,14 @@ export default function ClientWaitlist({ user }) {
       setToast({ msg: t('toastError'), type: 'error' })
       return
     }
+
+    // Notify barber via push (non-blocking — fires and forgets)
+    const newCount = (info.waiting || 0) + 1
+    notifyBarberQueueJoin({
+      barberId:   barber.id,
+      clientName: user.name || 'عميل',
+      queueCount: newCount,
+    })
 
     // Pick the right toast based on queue state at the moment of joining
     if (!info.onSeat && info.waiting === 0) {

@@ -4,6 +4,7 @@ import { useLang } from '../context/LanguageContext'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { requestNotificationPermission, showNativeNotification } from '../lib/nativeNotification'
+import { registerBarberPush } from '../lib/usePushNotifications'
 import ClientHome from '../client/ClientHome'
 import ClientWaitlist from '../client/ClientWaitlist'
 import ClientBarbers from '../client/ClientBarbers'
@@ -18,16 +19,26 @@ export default function ClientPage() {
   const [tab, setTab]       = useState('home')
   const [unread, setUnread] = useState(0)
 
-  // Bootstrap unread count on mount & request notification permissions for APK / browser
+  // Bootstrap unread count on mount & request notification permissions
   useEffect(() => {
     if (!user?.id) return
     requestNotificationPermission()
+    // Register for Web Push (works when app is closed too)
+    registerBarberPush(user.id)
+    // Listen for SW messages (notification tap -> open notifications tab)
+    function handleSwMessage(event) {
+      if (event.data?.type === 'OPEN_TAB' && event.data?.tab === 'notifications') {
+        setTab('notifications')
+      }
+    }
+    navigator.serviceWorker?.addEventListener('message', handleSwMessage)
     supabase
       .from('notifications')
       .select('id', { count: 'exact', head: true })
       .eq('target_user_id', user.id)
       .eq('is_read', false)
       .then(({ count }) => setUnread(count || 0))
+    return () => navigator.serviceWorker?.removeEventListener('message', handleSwMessage)
   }, [user?.id])
 
   // Live — increment dot and trigger system native notification whenever a new alert arrives

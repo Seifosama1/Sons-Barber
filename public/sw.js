@@ -82,21 +82,20 @@ self.addEventListener('fetch', (event) => {
 // ── Push Notifications (native) ──────────────────────────────
 self.addEventListener('push', (event) => {
   if (!event.data) return
+
   let payload
-  try {
-    payload = event.data.json()
-  } catch {
-    payload = { title: 'Sons Barber', body: event.data.text() }
-  }
+  try { payload = event.data.json() }
+  catch { payload = { title: 'Sons Barber', body: event.data.text() } }
 
   const options = {
-    body: payload.body || '',
-    icon: '/app-icon-gold.png',
-    badge: '/app-icon-gold.png',
-    tag: payload.tag || 'sons-barber-notif',
-    data: payload.data || {},
-    vibrate: [200, 100, 200],
+    body:               payload.body || '',
+    icon:               '/app-icon-gold.png',
+    badge:              '/app-icon-gold.png',
+    tag:                payload.tag  || 'sons-barber-notif',
+    data:               payload.data || {},
+    vibrate:            [200, 100, 200],
     requireInteraction: false,
+    renotify:           true,
   }
 
   event.waitUntil(
@@ -106,19 +105,20 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const data = event.notification.data || {}
-  const targetUrl = data.tab === 'queue' ? '/barber' : (data.url || '/')
+  const data      = event.notification.data || {}
+  const targetTab = data.tab || 'home'
+  const targetUrl = targetTab === 'queue' ? '/barber' : '/client'
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // If app is already open, focus it and post a message to switch tab
       for (const client of windowClients) {
-        if (client.url.includes('/barber') && 'focus' in client) {
-          client.postMessage({ type: 'OPEN_TAB', tab: data.tab || 'queue' })
+        const isBarber = client.url.includes('/barber')
+        const isClient = client.url.includes('/client')
+        if ((targetTab === 'queue' && isBarber) || (targetTab === 'notifications' && isClient)) {
+          client.postMessage({ type: 'OPEN_TAB', tab: targetTab })
           return client.focus()
         }
       }
-      // Otherwise open the app
       return clients.openWindow(targetUrl)
     })
   )
