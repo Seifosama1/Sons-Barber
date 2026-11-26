@@ -25,7 +25,7 @@ export default function ClientWaitlist({ user }) {
   async function fetchAll() {
     const { data: barberData } = await supabase
       .from('profiles')
-      .select('id, name, is_active, avatar_url, on_seat_client_id, hide_queue_count')
+      .select('id, name, is_active, avatar_url, on_seat_client_id')
       .eq('role', 'barber')
       .order('created_at')
 
@@ -61,12 +61,15 @@ export default function ClientWaitlist({ user }) {
         myQueueIndex = waitingEntries.findIndex(e => e.id === myEntry.id || e.client_id === user.id)
       }
 
+      // Check barber privacy setting from localStorage fallback or profile
+      const hideQueue = localStorage.getItem(`barber_hide_queue_${b.id}`) === 'true'
+
       map[b.id] = {
         waiting:      waitingCount,
         onSeat:       !!b.on_seat_client_id,
         myEntry:      myEntry || null,
         myQueueIndex: myQueueIndex,
-        hideQueue:    !!b.hide_queue_count,
+        hideQueue:    hideQueue,
       }
     }))
 
