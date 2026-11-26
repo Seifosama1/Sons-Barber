@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase, supabaseAdmin } from '../lib/supabase'
 import { adminCreateUser, adminUpdatePassword, adminDeleteUser } from '../lib/adminApi'
+import { queueTurnText } from '../lib/notifText'
 import { useRealtime } from '../lib/useRealtime'
 import { serviceSelect, serviceUpdate } from '../lib/serviceDb'
 import { useConfirm } from '../context/ConfirmContext'
@@ -424,10 +425,11 @@ function LiveQueueSheet({ barber, onClose }) {
   async function sendNextNotification(entry) {
     if (!entry?.client_id) return
     setNotifSent(entry.id)
+    const { title, body } = await queueTurnText(entry.client_id, barber.name)
     await serviceInsert('notifications', {
       target_user_id: entry.client_id,
-      title: 'حان دورك!',
-      body: `${barber.name} جاهز لك الآن، توجه للمحل.`,
+      title,
+      body,
       type: 'next_in_queue',
       is_read: false,
     })
@@ -530,10 +532,11 @@ function LiveQueueSheet({ barber, onClose }) {
     )
     const next = nextList?.[0]
     if (next?.client_id) {
+      const { title, body } = await queueTurnText(next.client_id, barber.name)
       await serviceInsert('notifications', {
         target_user_id: next.client_id,
-        title: 'حان دورك!',
-        body: `${barber.name} جاهز لك الآن، توجه للمحل.`,
+        title,
+        body,
         type: 'next_in_queue',
         is_read: false,
       })

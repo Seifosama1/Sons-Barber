@@ -141,6 +141,7 @@ const translations = {
     sendRating:      'إرسال التقييم',
     ratingDone:      'شكراً على تقييمك!',
     ratingCommentPlaceholder: 'أضف تعليقاً للحلاق (اختياري)...',
+    cancel:          'إلغاء',
 
     // ── Profile tab ──
     profileTitle:    'ملفي الشخصي',
@@ -345,6 +346,7 @@ const translations = {
     sendRating:      'Submit Rating',
     ratingDone:      'Thank you for your rating!',
     ratingCommentPlaceholder: 'Add a comment for the barber (optional)...',
+    cancel:          'Cancel',
 
     // ── Profile tab ──
     profileTitle:    'My Profile',

@@ -5,7 +5,7 @@ import { useLang } from '../context/LanguageContext'
 import { ClientNotificationsSkeleton } from '../components/ClientSkeletons'
 
 export default function ClientNotifications({ user, onUnreadChange }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading]             = useState(true)
 
@@ -89,7 +89,7 @@ export default function ClientNotifications({ user, onUnreadChange }) {
       ) : (
         <div className="cn-list">
           {notifications.map(n => (
-            <NotifItem key={n.id} n={n} user={user} t={t} onRated={() => markRated(n.id)} />
+            <NotifItem key={n.id} n={n} user={user} t={t} lang={lang} onRated={() => markRated(n.id)} />
           ))}
         </div>
       )}
@@ -97,7 +97,7 @@ export default function ClientNotifications({ user, onUnreadChange }) {
   )
 }
 
-function NotifItem({ n, user, t, onRated }) {
+function NotifItem({ n, user, t, onRated, lang }) {
   const isRatingReq = n.type === 'rating_request'
   const isPhoneLink = n.action_url && !isRatingReq && n.type === 'booking_rejected'
 
@@ -105,7 +105,11 @@ function NotifItem({ n, user, t, onRated }) {
     if (!phone) return ''
     let clean = phone.replace(/[^0-9]/g, '')
     if (clean.startsWith('01')) clean = '2' + clean
-    const msg = encodeURIComponent(`مرحباً، بخصوص رفض طلب الحجز الخاص بي في صالون Sons Barber.`)
+    const msg = encodeURIComponent(
+      lang === 'en'
+        ? `Hello, regarding the rejected booking at Sons Barber.`
+        : `مرحباً، بخصوص رفض طلب الحجز الخاص بي في صالون Sons Barber.`
+    )
     return `https://wa.me/${clean}?text=${msg}`
   }
 
@@ -146,7 +150,7 @@ function NotifItem({ n, user, t, onRated }) {
           />
         )}
 
-        <div className="cn-item-time">{formatTime(n.sent_at)}</div>
+        <div className="cn-item-time">{formatTime(n.sent_at, lang)}</div>
       </div>
     </div>
   )
@@ -328,11 +332,18 @@ function notifIcon(type) {
   }
 }
 
-function formatTime(iso) {
+function formatTime(iso, lang) {
   if (!iso) return ''
   const d   = new Date(iso)
   const now = new Date()
   const diff = now - d
+  if (lang === 'en') {
+    if (diff < 60000)     return 'Just now'
+    if (diff < 3600000)   return `${Math.floor(diff / 60000)}m ago`
+    if (diff < 86400000)  return `${Math.floor(diff / 3600000)}h ago`
+    if (diff < 604800000) return `${Math.floor(diff / 86400000)}d ago`
+    return `${d.getDate()}/${d.getMonth() + 1}`
+  }
   if (diff < 60000)     return 'الآن'
   if (diff < 3600000)   return `${Math.floor(diff / 60000)} دقيقة`
   if (diff < 86400000)  return `${Math.floor(diff / 3600000)} ساعة`

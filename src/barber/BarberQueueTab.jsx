@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { serviceSelect, serviceUpdate, serviceInsert } from '../lib/serviceDb'
 import { useRealtime } from '../lib/useRealtime'
 import { useConfirm } from '../context/ConfirmContext'
+import { queueTurnText, queueUpdateText } from '../lib/notifText'
 
 export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpenAdd }) {
   const { askConfirm } = useConfirm()
@@ -188,21 +189,23 @@ export default function BarberQueueTab({ user, initialOpenAdd, onResetInitialOpe
     if (!entry?.client_id) return
     setNotifSent(entry.id)
 
-    let notifBody = ''
+    let notifTitle, notifBody
     if (queueIdx === 0 && chairEntry) {
-      // 1 on chair and this client is #1 in line -> "أنت التالي في الدور، توجه للمحل"
-      notifBody = `أنت التالي في الدور عند ${user.name}، توجه للمحل الآن`
+      const text = await queueTurnText(entry.client_id, user.name)
+      notifTitle = text.title
+      notifBody  = text.body
     } else {
-      // Ahead count = queueIdx (since 0-indexed in waiting list)
       const aheadCount = queueIdx + (chairEntry ? 1 : 0)
-      notifBody = `يوجد ${aheadCount} عملاء قبلك في الدور عند ${user.name}. سنبلغك فور اقتراب دورك`
+      const text = await queueUpdateText(entry.client_id, user.name, aheadCount)
+      notifTitle = text.title
+      notifBody  = text.body
     }
 
     await serviceInsert('notifications', {
       target_user_id: entry.client_id,
-      title: 'تحديث طابور الانتظار',
-      body: notifBody,
-      type: 'next_in_queue',
+      title: notifTitle,
+      body:  notifBody,
+      type:  'next_in_queue',
       is_read: false,
     })
 
