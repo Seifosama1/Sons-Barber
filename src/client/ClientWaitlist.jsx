@@ -79,6 +79,16 @@ export default function ClientWaitlist({ user }) {
   }
 
   async function joinWaitlist(barber) {
+    // Check if client is already waiting or in_service in ANY barber's queue
+    const currentActive = Object.values(mapRef.current).find(
+      info => info.myEntry && (info.myEntry.status === 'waiting' || info.myEntry.status === 'in_service')
+    )
+
+    if (currentActive) {
+      setToast({ msg: t('toastAlreadyInQueue'), type: 'error' })
+      return
+    }
+
     setJoining(barber.id)
 
     // Read state BEFORE insert to decide the right toast
@@ -144,6 +154,11 @@ export default function ClientWaitlist({ user }) {
 
   if (loading) return <ClientWaitlistSkeleton />
 
+  // Check if client is currently in ANY queue
+  const isClientInAnyQueue = Object.values(waitlistMap).some(
+    info => info?.myEntry && (info.myEntry.status === 'waiting' || info.myEntry.status === 'in_service')
+  )
+
   return (
     <div className="cw-page">
       <div className="cw-header">
@@ -192,7 +207,12 @@ export default function ClientWaitlist({ user }) {
                     {t('leaveQueue')}
                   </button>
                 ) : (
-                  <button className="cw-join-btn" disabled={joining === b.id} onClick={() => joinWaitlist(b)}>
+                  <button
+                    className="cw-join-btn"
+                    disabled={joining === b.id || isClientInAnyQueue}
+                    style={isClientInAnyQueue ? { opacity: 0.45, cursor: 'not-allowed', filter: 'grayscale(0.6)' } : {}}
+                    onClick={() => joinWaitlist(b)}
+                  >
                     {joining === b.id
                       ? <span className="btn-spinner" style={{ width: 18, height: 18 }} />
                       : t('joinQueue')}
