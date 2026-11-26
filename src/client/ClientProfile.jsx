@@ -9,9 +9,10 @@ import { ClientProfileSkeleton } from '../components/ClientSkeletons'
 
 export default function ClientProfile({ user, onOpenSettings }) {
   const { t } = useLang()
-  const [copied, setCopied]   = useState(false)
-  const [toast, setToast]     = useState(null)
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || user?.avatarUrl || null)
+  const [copied, setCopied]         = useState(false)
+  const [toast, setToast]           = useState(null)
+  const [avatarUrl, setAvatarUrl]   = useState(user?.avatar_url || user?.avatarUrl || null)
+  const [showAvatarModal, setShowAvatarModal] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const avatarFileRef = useRef(null)
 
@@ -95,7 +96,7 @@ export default function ClientProfile({ user, onOpenSettings }) {
 
       <div className="cp-hero">
         <div className="bp-avatar-wrap">
-          <div className="cp-avatar" style={{ overflow: 'hidden' }}>
+          <div className="cp-avatar" onClick={() => setShowAvatarModal(true)} style={{ cursor: 'pointer', overflow: 'hidden' }}>
             {avatarUrl ? (
               <img src={avatarUrl} alt={user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
@@ -120,6 +121,60 @@ export default function ClientProfile({ user, onOpenSettings }) {
         <div className="cp-name">{user?.name}</div>
         <div className="cp-phone">{user?.phone}</div>
       </div>
+
+      {/* Avatar Modal */}
+      {showAvatarModal && (
+        <div
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,0.92)',
+            zIndex: 1200,
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            padding: '1rem',
+          }}
+          onClick={() => setShowAvatarModal(false)}
+        >
+          <button
+            onClick={() => setShowAvatarModal(false)}
+            style={{
+              position: 'absolute', top: '1.2rem', right: '1.2rem',
+              background: '#222', border: 'none', color: '#fff',
+              width: 36, height: 36, borderRadius: '50%',
+              fontSize: '1.2rem', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >✕</button>
+
+          <div style={{
+            width: 150, height: 150, borderRadius: '50%',
+            overflow: 'hidden', border: '3px solid var(--gold, #c9a84c)',
+            background: 'linear-gradient(135deg, #c9a84c, #8b6914)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#000', fontSize: '3.5rem', fontWeight: 800,
+            marginBottom: '1.5rem',
+          }}>
+            {avatarUrl
+              ? <img src={avatarUrl} alt={user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <span>{initial}</span>
+            }
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.75rem' }} onClick={e => e.stopPropagation()}>
+            <button
+              className="bp-modal-btn edit"
+              onClick={() => { setShowAvatarModal(false); avatarFileRef.current?.click() }}
+            >
+              تغيير الصورة
+            </button>
+            {avatarUrl && (
+              <button className="bp-modal-btn delete" onClick={handleDeleteAvatar}>
+                حذف الصورة
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
 
       <div className="cp-code-card">
