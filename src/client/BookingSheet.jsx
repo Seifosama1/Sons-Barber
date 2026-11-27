@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { useConfirm } from '../context/ConfirmContext'
-
-const DAYS_AR   = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت']
-const MONTHS_AR = ['يناير','فبراير','مارس','إبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
+import { useLang } from '../context/LanguageContext'
 
 function getNext14Days() {
   return Array.from({ length: 14 }, (_, i) => {
@@ -14,6 +12,7 @@ function getNext14Days() {
 
 export default function BookingSheet({ user, onClose, onBooked }) {
   const { askConfirm } = useConfirm()
+  const { t, lang } = useLang()
   const [step, setStep]           = useState(1) // 1=barber 2=date 3=time 4=service 5=deposit
   const [slideDir, setSlideDir]   = useState('forward') // 'forward' | 'backward'
   const [barbers, setBarbers]     = useState([])
@@ -30,6 +29,9 @@ export default function BookingSheet({ user, onClose, onBooked }) {
   const [saving, setSaving]       = useState(false)
   const [error, setError]         = useState('')
   const days = getNext14Days()
+
+  const daysArr = t('days') || ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت']
+  const monthsArr = t('months') || ['يناير','فبراير','مارس','إبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
 
   function goToStep(nextStep) {
     setSlideDir(nextStep > step ? 'forward' : 'backward')
@@ -95,19 +97,33 @@ export default function BookingSheet({ user, onClose, onBooked }) {
     setReceiptPreview(URL.createObjectURL(file))
   }
 
+  function formatHour(h) {
+    const isEn = lang === 'en'
+    if (h === 0) return isEn ? '12:00 AM' : '12:00 ص'
+    if (h < 12) return isEn ? `${h}:00 AM` : `${h}:00 ص`
+    if (h === 12) return isEn ? '12:00 PM' : '12:00 م'
+    return isEn ? `${h-12}:00 PM` : `${h-12}:00 م`
+  }
+
   async function handleSubmit() {
     if (!selBarber || !selDate || selHour === null || !selService || !receipt) {
-      setError('من فضلك أكمل جميع الخطوات وأرفق إيصال الدفع'); return
+      setError(t('errCompleteSteps'))
+      return
     }
 
-    const dateStr = selDate ? `${selDate.getDate()} ${MONTHS_AR[selDate.getMonth()]}` : ''
+    const dateStr = selDate ? `${selDate.getDate()} ${monthsArr[selDate.getMonth()]}` : ''
     const hourStr = formatHour(selHour)
 
     const ok = await askConfirm({
-      title: 'تأكيد إرسال طلب الحجز',
-      message: `هل أنت متأكد من رغبتك في إرسال طلب الحجز؟\n\n• الحلاق: ${selBarber?.name}\n• الخدمة: ${selService?.name}\n• الموعد: ${dateStr} الساعة ${hourStr}\n• العربون: ${deposit} ج.م`,
-      confirmText: 'نعم، إرسال الحجز',
-      cancelText: 'مراجعة التفاصيل',
+      title: t('confirmBookingTitle'),
+      message: t('confirmBookingMsg', {
+        barber: selBarber?.name,
+        service: selService?.name,
+        dateTime: `${dateStr} ${hourStr}`,
+        deposit: `${deposit} ${t('currencyEg')}`,
+      }),
+      confirmText: t('confirmBookingYes'),
+      cancelText: t('confirmBookingReview'),
       type: 'warning',
     })
 
@@ -121,7 +137,7 @@ export default function BookingSheet({ user, onClose, onBooked }) {
     const { error: uploadErr } = await supabase.storage
       .from('instapay-receipts')
       .upload(path, receipt, { upsert: true })
-    if (uploadErr) { setError('فشل رفع الإيصال: ' + uploadErr.message); setSaving(false); return }
+    if (uploadErr) { setError(t('errUploadFailed') + ': ' + uploadErr.message); setSaving(false); return }
 
     // Build scheduled_at
     const scheduled = new Date(selDate)
@@ -147,13 +163,6 @@ export default function BookingSheet({ user, onClose, onBooked }) {
     (_, i) => shopHours.open + i
   ).filter(h => !takenHours.includes(h))
 
-  function formatHour(h) {
-    if (h === 0) return '12:00 ص'
-    if (h < 12) return `${h}:00 ص`
-    if (h === 12) return '12:00 م'
-    return `${h-12}:00 م`
-  }
-
   const deposit = selService?.deposit_amount || 50
 
   return (
@@ -172,7 +181,7 @@ export default function BookingSheet({ user, onClose, onBooked }) {
           {/* STEP 1: Select barber */}
           {step === 1 && (
             <div key="step1" className={`booking-step-content slide-${slideDir}`}>
-              <div className="booking-step-title">اختر الحلاق</div>
+              <div className="booking-step-title">{t('stepBarber')}</div>
               <div className="booking-barber-list">
                 {barbers.map(b => (
                   <button
@@ -192,7 +201,7 @@ export default function BookingSheet({ user, onClose, onBooked }) {
                 ))}
               </div>
               <button className="booking-next-btn" disabled={!selBarber} onClick={() => goToStep(2)}>
-                التالي ←
+                {t('nextBtn')}
               </button>
             </div>
           )}
@@ -200,7 +209,7 @@ export default function BookingSheet({ user, onClose, onBooked }) {
           {/* STEP 2: Select date */}
           {step === 2 && (
             <div key="step2" className={`booking-step-content slide-${slideDir}`}>
-              <div className="booking-step-title">اختر التاريخ</div>
+              <div className="booking-step-title">{t('stepDate')}</div>
               <div className="booking-days-grid">
                 {days.map((d, i) => {
                   const isSel = selDate?.toDateString() === d.toDateString()
@@ -210,16 +219,16 @@ export default function BookingSheet({ user, onClose, onBooked }) {
                       className={`booking-day-btn ${isSel ? 'selected' : ''}`}
                       onClick={() => setSelDate(d)}
                     >
-                      <span className="booking-day-name">{DAYS_AR[d.getDay()].slice(0,3)}</span>
+                      <span className="booking-day-name">{daysArr[d.getDay()].slice(0,3)}</span>
                       <span className="booking-day-num">{d.getDate()}</span>
-                      <span className="booking-day-month">{MONTHS_AR[d.getMonth()].slice(0,3)}</span>
+                      <span className="booking-day-month">{monthsArr[d.getMonth()].slice(0,3)}</span>
                     </button>
                   )
                 })}
               </div>
               <div className="booking-nav">
-                <button className="booking-back-btn" onClick={() => goToStep(1)}>← السابق</button>
-                <button className="booking-next-btn" disabled={!selDate} onClick={() => goToStep(3)}>التالي ←</button>
+                <button className="booking-back-btn" onClick={() => goToStep(1)}>{t('backBtn')}</button>
+                <button className="booking-next-btn" disabled={!selDate} onClick={() => goToStep(3)}>{t('nextBtn')}</button>
               </div>
             </div>
           )}
@@ -228,11 +237,11 @@ export default function BookingSheet({ user, onClose, onBooked }) {
           {step === 3 && (
             <div key="step3" className={`booking-step-content slide-${slideDir}`}>
               <div className="booking-step-title">
-                اختر الوقت
-                <span className="booking-step-sub"> — {selDate && `${DAYS_AR[selDate.getDay()]} ${selDate.getDate()} ${MONTHS_AR[selDate.getMonth()]}`}</span>
+                {t('stepTime')}
+                <span className="booking-step-sub"> — {selDate && `${daysArr[selDate.getDay()]} ${selDate.getDate()} ${monthsArr[selDate.getMonth()]}`}</span>
               </div>
               {availableHours.length === 0 ? (
-                <div className="booking-no-slots">لا توجد مواعيد متاحة في هذا اليوم</div>
+                <div className="booking-no-slots">{t('noSlots')}</div>
               ) : (
                 <div className="booking-hours-grid">
                   {availableHours.map(h => (
@@ -247,8 +256,8 @@ export default function BookingSheet({ user, onClose, onBooked }) {
                 </div>
               )}
               <div className="booking-nav">
-                <button className="booking-back-btn" onClick={() => goToStep(2)}>← السابق</button>
-                <button className="booking-next-btn" disabled={selHour === null} onClick={() => goToStep(4)}>التالي ←</button>
+                <button className="booking-back-btn" onClick={() => goToStep(2)}>{t('backBtn')}</button>
+                <button className="booking-next-btn" disabled={selHour === null} onClick={() => goToStep(4)}>{t('nextBtn')}</button>
               </div>
             </div>
           )}
@@ -256,7 +265,7 @@ export default function BookingSheet({ user, onClose, onBooked }) {
           {/* STEP 4: Select service */}
           {step === 4 && (
             <div key="step4" className={`booking-step-content slide-${slideDir}`}>
-              <div className="booking-step-title">اختر الخدمة</div>
+              <div className="booking-step-title">{t('stepService')}</div>
               <div className="booking-services-list">
                 {services.map(svc => {
                   const finalPrice = svc.discount_pct > 0
@@ -270,19 +279,19 @@ export default function BookingSheet({ user, onClose, onBooked }) {
                     >
                       <div className="bsvc-info">
                         <span className="bsvc-name">{svc.name}</span>
-                        <span className="bsvc-duration">{svc.duration} دقيقة</span>
+                        <span className="bsvc-duration">{svc.duration} {t('min')}</span>
                       </div>
                       <div className="bsvc-price-block">
-                        {svc.discount_pct > 0 && <span className="bsvc-old">{svc.price} ج</span>}
-                        <span className="bsvc-price">{finalPrice} ج</span>
+                        {svc.discount_pct > 0 && <span className="bsvc-old">{svc.price} {t('currencyShort')}</span>}
+                        <span className="bsvc-price">{finalPrice} {t('currencyShort')}</span>
                       </div>
                     </button>
                   )
                 })}
               </div>
               <div className="booking-nav">
-                <button className="booking-back-btn" onClick={() => goToStep(3)}>← السابق</button>
-                <button className="booking-next-btn" disabled={!selService} onClick={() => goToStep(5)}>التالي ←</button>
+                <button className="booking-back-btn" onClick={() => goToStep(3)}>{t('backBtn')}</button>
+                <button className="booking-next-btn" disabled={!selService} onClick={() => goToStep(5)}>{t('nextBtn')}</button>
               </div>
             </div>
           )}
@@ -290,25 +299,25 @@ export default function BookingSheet({ user, onClose, onBooked }) {
           {/* STEP 5: Deposit + receipt */}
           {step === 5 && (
             <div key="step5" className={`booking-step-content slide-${slideDir}`}>
-              <div className="booking-step-title">إيداع العربون</div>
+              <div className="booking-step-title">{t('stepDeposit')}</div>
 
               {/* Summary */}
               <div className="booking-summary">
-                <div className="bsum-row"><span>الحلاق</span><span>{selBarber?.name}</span></div>
-                <div className="bsum-row"><span>الخدمة</span><span>{selService?.name}</span></div>
-                <div className="bsum-row"><span>الموعد</span><span>
-                  {selDate && `${selDate.getDate()} ${MONTHS_AR[selDate.getMonth()]}`} — {formatHour(selHour)}
+                <div className="bsum-row"><span>{t('barber')}</span><span>{selBarber?.name}</span></div>
+                <div className="bsum-row"><span>{t('service')}</span><span>{selService?.name}</span></div>
+                <div className="bsum-row"><span>{t('appointment')}</span><span>
+                  {selDate && `${selDate.getDate()} ${monthsArr[selDate.getMonth()]}`} — {formatHour(selHour)}
                 </span></div>
                 <div className="bsum-row bsum-deposit">
-                  <span>العربون المطلوب</span>
-                  <span className="bsum-deposit-val">{deposit} ج.م</span>
+                  <span>{t('depositRequired')}</span>
+                  <span className="bsum-deposit-val">{deposit} {t('currencyEg')}</span>
                 </div>
               </div>
 
               <div className="booking-instapay-hint" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <InstapayIcon />
-                  <span style={{ fontWeight: 600 }}>حوّل العربون عبر InstaPay وارفع لقطة الشاشة هنا</span>
+                  <span style={{ fontWeight: 600 }}>{t('instapayHint')}</span>
                 </div>
                 <a
                   href="https://ipn.eg/S/seif.osama33/instapay/6WuhMV"
@@ -330,7 +339,7 @@ export default function BookingSheet({ user, onClose, onBooked }) {
                     transition: 'all 0.2s',
                   }}
                 >
-                  <span>اضغط هنا للتحويل الفوري عبر InstaPay ⚡</span>
+                  <span>{t('instapayDirectLink')}</span>
                 </a>
               </div>
 
@@ -338,22 +347,22 @@ export default function BookingSheet({ user, onClose, onBooked }) {
               <label className="receipt-upload-area">
                 <input type="file" accept="image/*" style={{ display:'none' }} onChange={handleReceiptChange} />
                 {receiptPreview ? (
-                  <img src={receiptPreview} alt="الإيصال" className="receipt-preview-img" />
+                  <img src={receiptPreview} alt={t('uploadReceipt')} className="receipt-preview-img" />
                 ) : (
                   <div className="receipt-upload-placeholder">
                     <UploadIcon />
-                    <span>اضغط لرفع صورة الإيصال</span>
+                    <span>{t('uploadReceipt')}</span>
                   </div>
                 )}
               </label>
 
               {/* Notes */}
               <div className="sheet-field">
-                <label className="sheet-label">ملاحظات (اختياري)</label>
+                <label className="sheet-label">{t('notes')}</label>
                 <textarea
                   className="sheet-input"
                   rows={2}
-                  placeholder="أي طلبات خاصة؟"
+                  placeholder={t('notesPlaceholder')}
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                   style={{ resize:'none' }}
@@ -363,13 +372,13 @@ export default function BookingSheet({ user, onClose, onBooked }) {
               {error && <div className="sheet-error">{error}</div>}
 
               <div className="booking-nav">
-                <button className="booking-back-btn" onClick={() => goToStep(4)}>← السابق</button>
+                <button className="booking-back-btn" onClick={() => goToStep(4)}>{t('backBtn')}</button>
                 <button
                   className="booking-submit-btn"
                   disabled={!receipt || saving}
                   onClick={handleSubmit}
                 >
-                  {saving ? <span className="btn-spinner" /> : 'إرسال الطلب'}
+                  {saving ? <span className="btn-spinner" /> : t('submitBooking')}
                 </button>
               </div>
             </div>
