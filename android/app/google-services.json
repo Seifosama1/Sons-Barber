@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "147576790670",
+    "project_id": "sonsbarber",
+    "storage_bucket": "sonsbarber.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:147576790670:android:5f2a120b1f612e8bae33df",
+        "android_client_info": {
+          "package_name": "com.sonsbarber.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKYrQqLq97klov9muoyuRgau4Egg-rBVQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

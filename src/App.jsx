@@ -10,6 +10,7 @@ import { LanguageProvider, useLang } from './context/LanguageContext'
 import { ConfirmProvider } from './context/ConfirmContext'
 import LoadingScreen from './components/LoadingScreen'
 import NoInternetModal from './components/NoInternetModal'
+import { initPushNotifications } from './lib/nativeNotification'
 import './styles/spinner.css'
 
 function ProtectedRoute({ children, role }) {
@@ -31,6 +32,7 @@ function AppRoutes() {
   useEffect(() => {
     if (user?.id) {
       syncLangFromProfile(user.id)
+      initPushNotifications(user.id)
     }
   }, [user?.id])
 
