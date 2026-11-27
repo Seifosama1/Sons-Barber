@@ -156,9 +156,8 @@ function NotifItem({ n, user, t, onRated, lang }) {
   )
 }
 
-/* ── Inline star rating widget with optional comment ── */
+/* ── Inline star rating widget with comment ── */
 function RatingWidget({ barberId, notifId, user, t, alreadyRated, onRated }) {
-  const [isOpen, setIsOpen]   = useState(false)
   const [stars, setStars]     = useState(0)
   const [hover, setHover]     = useState(0)
   const [comment, setComment] = useState('')
@@ -168,14 +167,15 @@ function RatingWidget({ barberId, notifId, user, t, alreadyRated, onRated }) {
   // If parent marks this as rated, sync state
   useEffect(() => { if (alreadyRated) setDone(true) }, [alreadyRated])
 
-  async function submitRating() {
-    if (!stars || done) return
+  async function submitRating(selectedStars = stars) {
+    const starCount = selectedStars || stars
+    if (!starCount || done || saving) return
     setSaving(true)
 
     const payload = {
       barber_id:       barberId,
       client_id:       user.id,
-      rating:          stars,
+      rating:          starCount,
       notification_id: notifId,
     }
     if (comment.trim()) {
@@ -189,7 +189,6 @@ function RatingWidget({ barberId, notifId, user, t, alreadyRated, onRated }) {
       onRated()
     } else {
       console.warn('Rating submission error:', error)
-      // If error was due to comment column not added yet in supabase, fallback to insert without comment
       if (payload.comment && error.message?.includes('comment')) {
         delete payload.comment
         const { error: retryErr } = await supabase.from('barber_ratings').insert(payload)
@@ -201,75 +200,89 @@ function RatingWidget({ barberId, notifId, user, t, alreadyRated, onRated }) {
     }
   }
 
-  if (done) return (
-    <div className="cn-rating-done"><span>{t('ratingDone')}</span></div>
-  )
-
-  if (!isOpen) {
-    return (
-      <div style={{ marginTop: '8px' }}>
-        <button
-          className="cn-rate-btn"
-          onClick={() => setIsOpen(true)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '0.45rem 0.95rem',
-            background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
-            color: '#000',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '0.8rem',
-            fontWeight: '800',
-            cursor: 'pointer'
-          }}
-        >
-          ★ {t('rateBarber') || 'تقييم الحلاق'}
-        </button>
-      </div>
-    )
+  function handleStarClick(i) {
+    setStars(i)
   }
 
+  if (done) return (
+    <div className="cn-rating-done" style={{ marginTop: '8px' }}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#2ecc71', fontSize: '0.82rem', fontWeight: 'bold' }}>
+        ✓ {t('ratingDone') || 'شكراً على تقييمك!'}
+      </span>
+    </div>
+  )
+
   return (
-    <div className="cn-rating-widget">
-      <div className="cn-stars">
+    <div className="cn-rating-widget" style={{ marginTop: '10px', background: 'rgba(255,255,255,0.03)', padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(201,168,76,0.2)' }}>
+      <div style={{ fontSize: '0.78rem', color: '#aaa', marginBottom: '6px', fontWeight: '600' }}>
+        {t('howWasYourSession') || 'اختر تقييمك:'}
+      </div>
+      <div className="cn-stars" style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
         {[1,2,3,4,5].map(i => (
-          <button key={i} className={`cn-star ${(hover || stars) >= i ? 'lit' : ''}`}
-            onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(0)}
-            onClick={() => setStars(i)}>★</button>
+          <button
+            key={i}
+            type="button"
+            className={`cn-star ${(hover || stars) >= i ? 'lit' : ''}`}
+            onMouseEnter={() => setHover(i)}
+            onMouseLeave={() => setHover(0)}
+            onClick={() => handleStarClick(i)}
+            style={{
+              fontSize: '1.4rem',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: (hover || stars) >= i ? '#C9A84C' : '#444',
+              transition: 'transform 0.15s, color 0.15s',
+              transform: (hover || stars) >= i ? 'scale(1.15)' : 'scale(1)',
+              padding: '2px'
+            }}
+          >
+            ★
+          </button>
         ))}
       </div>
 
       {stars > 0 && (
-        <textarea
-          className="cn-rating-comment-input"
-          placeholder={t('ratingCommentPlaceholder')}
-          value={comment}
-          onChange={e => setComment(e.target.value)}
-          rows={2}
-          maxLength={300}
-        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <textarea
+            className="cn-rating-comment-input"
+            placeholder={t('ratingCommentPlaceholder') || 'أضف تعليقاً على الجلسة (اختياري)...'}
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            rows={2}
+            maxLength={300}
+            style={{
+              width: '100%',
+              background: '#111',
+              border: '1px solid #333',
+              borderRadius: '6px',
+              color: '#fff',
+              fontSize: '0.8rem',
+              padding: '6px 8px',
+              resize: 'none'
+            }}
+          />
+          <button
+            className="cn-rating-submit"
+            onClick={() => submitRating()}
+            disabled={saving}
+            style={{
+              alignSelf: 'flex-start',
+              padding: '0.4rem 1rem',
+              background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
+              color: '#000',
+              fontWeight: '800',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              marginTop: '2px'
+            }}
+          >
+            {saving ? <span className="btn-spinner" style={{ width: 14, height: 14 }} /> : (t('sendRating') || 'إرسال التقييم')}
+          </button>
+        </div>
       )}
-
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-        <button className="cn-rating-submit" onClick={submitRating} disabled={!stars || saving}>
-          {saving ? <span className="btn-spinner" style={{ width: 14, height: 14 }} /> : t('sendRating')}
-        </button>
-        <button
-          onClick={() => setIsOpen(false)}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: '#888',
-            fontSize: '0.78rem',
-            cursor: 'pointer',
-            padding: '4px 8px'
-          }}
-        >
-          {t('cancel') || 'إلغاء'}
-        </button>
-      </div>
     </div>
   )
 }

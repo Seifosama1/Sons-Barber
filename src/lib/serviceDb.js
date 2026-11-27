@@ -31,7 +31,33 @@ export async function serviceInsert(table, row) {
     return { data: null, error: { message: `HTTP ${res.status}: ${body}` } }
   }
   const data = await res.json()
+
+  // Whenever a notification is inserted, automatically trigger background FCM push
+  if (table === 'notifications' && row?.target_user_id) {
+    triggerFcmPush({
+      targetUserId: row.target_user_id,
+      title: row.title || 'Sons Barber ✂️',
+      body: row.body || '',
+      data: {
+        type: row.type || '',
+        action_url: row.action_url || '',
+        id: row.id || ''
+      }
+    }).catch(() => {})
+  }
+
   return { data, error: null }
+}
+
+async function triggerFcmPush(payload) {
+  try {
+    const endpoint = '/api/send-fcm'
+    fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(() => {})
+  } catch {}
 }
 
 /**
