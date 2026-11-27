@@ -3,8 +3,8 @@
  * Bypasses RLS for portfolio_photos and profiles tables.
  */
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-const SERVICE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_KEY
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://dlbeywpyjdhynflmqvgb.supabase.co'
+const SERVICE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsYmV5d3B5amRoeW5mbG1xdmdiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NDc1ODM1MiwiZXhwIjoyMTEwMzM0MzUyfQ.wB_iUoXsqHFLVltAmbmBHR99LbvuRDgIeQuXlIp2fo4'
 
 function headers(extra = {}) {
   return {

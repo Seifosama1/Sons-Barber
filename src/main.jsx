@@ -3,8 +3,10 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
-// Register Service Worker with instant auto-update mechanism
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
+// Register Service Worker with instant auto-update mechanism ONLY in web browsers, never in native APK
+const isNativeApp = window.Capacitor?.isNativePlatform?.() || window.location.protocol === 'capacitor:'
+
+if ('serviceWorker' in navigator && import.meta.env.PROD && !isNativeApp) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then((reg) => {
       // Force checking for sw.js updates every time page opens
@@ -16,7 +18,6 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // Tell new worker to skip waiting and activate immediately
               newWorker.postMessage('SKIP_WAITING')
             }
           })
@@ -26,7 +27,6 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
       console.warn('Service worker registration failed:', err)
     })
 
-    // When the controlling service worker changes, reload once to ensure all assets are current
     let refreshing = false
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (!refreshing) {
