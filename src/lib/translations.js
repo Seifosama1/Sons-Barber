@@ -100,6 +100,14 @@ const translations = {
     deposit:         'العربون',
     min:             'دقيقة',
 
+    currencyEg:      'ج.م',
+    currencyShort:   'ج',
+    instapayDirectLink:'اضغط هنا للتحويل الفوري عبر InstaPay ⚡',
+    confirmBookingTitle: 'تأكيد إرسال طلب الحجز',
+    confirmBookingMsg: 'هل أنت متأكد من رغبتك في إرسال طلب الحجز؟\n\n• الحلاق: {barber}\n• الخدمة: {service}\n• الموعد: {dateTime}\n• العربون: {deposit}',
+    confirmBookingYes: 'نعم، إرسال الحجز',
+    confirmBookingReview: 'مراجعة التفاصيل',
+
     // Days & months
     days:   ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],
     months: ['يناير','فبراير','مارس','إبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],
@@ -454,6 +462,14 @@ const translations = {
     appointment:     'Appointment',
     deposit:         'Deposit',
     min:             'min',
+
+    currencyEg:      'EGP',
+    currencyShort:   'EGP',
+    instapayDirectLink:'Tap here for instant transfer via InstaPay ⚡',
+    confirmBookingTitle: 'Confirm Booking Request',
+    confirmBookingMsg: 'Are you sure you want to send this booking request?\n\n• Barber: {barber}\n• Service: {service}\n• Time: {dateTime}\n• Deposit: {deposit}',
+    confirmBookingYes: 'Yes, Send Request',
+    confirmBookingReview: 'Review Details',
 
     // Days & months
     days:   ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
