@@ -218,6 +218,26 @@ async function notifyClientsOfDiscount(service, isNew = false) {
   if (!insertRes.ok) {
     console.error('Failed to insert service notifications:', await insertRes.text())
   }
+
+  // Send FCM push to every client so they receive it even when app is killed/backgrounded
+  const fcmBase = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'https://sonsbarber-app.vercel.app'
+
+  const fcmPromises = clientIds.map(clientId =>
+    fetch(`${fcmBase}/api/send-fcm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        targetUserId: clientId,
+        title,
+        body,
+        data: { type: 'offer' }
+      })
+    }).catch(() => {})
+  )
+  // Fire all FCM pushes in parallel, non-blocking
+  Promise.all(fcmPromises).catch(() => {})
 }
 
 /* ── Add / Edit Sheet ── */

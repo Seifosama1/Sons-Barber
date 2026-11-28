@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { notifyClientPush } from '../lib/usePushNotifications'
 import { bookingApprovedText, bookingRejectedText } from '../lib/notifText'
+import { serviceInsert } from '../lib/serviceDb'
 import ServicesSection from './ServicesSection'
 
 const DAYS_AR   = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت']
@@ -176,7 +177,7 @@ export default function DashTab({ user, onNavigateTab }) {
         ? await bookingApprovedText(req.client.id, req.barber?.name)
         : await bookingRejectedText(req.client.id, adminPhone)
 
-      await supabase.from('notifications').insert({
+      await serviceInsert('notifications', {
         target_user_id: req.client.id,
         title: notifTitle,
         body: notifBody,
@@ -184,12 +185,7 @@ export default function DashTab({ user, onNavigateTab }) {
         action_url: isApproved ? null : adminPhone,
         sent_by: (await supabase.auth.getUser()).data.user?.id,
       })
-      notifyClientPush({
-        clientId: req.client.id,
-        title:    notifTitle,
-        body:     notifBody,
-        tag:      `booking-${req.id}`,
-      })
+      // FCM push is now auto-triggered by serviceInsert above
     }
 
     setRequests(prev => prev.filter(r => r.id !== id))

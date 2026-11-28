@@ -51,7 +51,9 @@ export async function serviceInsert(table, row) {
 
 async function triggerFcmPush(payload) {
   try {
-    const endpoint = '/api/send-fcm'
+    // Always use the absolute Vercel URL so FCM works even inside Capacitor APK WebView
+    // The relative path '/api/send-fcm' would fail in native APK context (no server at localhost)
+    const endpoint = 'https://sonsbarber-app.vercel.app/api/send-fcm'
     fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
