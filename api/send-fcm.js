@@ -89,24 +89,37 @@ export default async function handler(req, res) {
 
     const results = []
     for (const token of targetTokens) {
+      // Merge any custom data fields (all values must be strings for FCM)
+      const dataPayload = {
+        title: title || 'Sons Barber',
+        body: body || '',
+        ...(data ? Object.fromEntries(Object.entries(data).map(([k, v]) => [k, String(v)])) : {})
+      }
+
       const fcmPayload = {
         message: {
           token,
+          // 'notification' block: shown by FCM system tray on background/killed (Android handles it natively)
           notification: {
             title: title || 'Sons Barber',
             body: body || ''
           },
+          // 'data' block: REQUIRED for background/killed delivery on many Android OEMs (Samsung, Xiaomi etc.)
+          // Also used by Capacitor PushNotifications listener when app is in foreground
+          data: dataPayload,
           android: {
-            priority: 'high',
+            priority: 'high',   // Must be 'high' to wake screen / bypass Doze mode
+            ttl: '86400s',      // Keep message for 24h if device is offline
             notification: {
-              channel_id: 'sons_barber_default',
+              channel_id: 'sons_barber_default',  // Must match channel created in Android XML
               sound: 'default',
-              notification_priority: 'PRIORITY_HIGH',
+              notification_priority: 'PRIORITY_MAX',
               default_sound: true,
-              default_vibrate_timings: true
+              default_vibrate_timings: true,
+              visibility: 'PUBLIC',   // Show on lock screen
+              notification_count: 1
             }
-          },
-          data: data ? Object.fromEntries(Object.entries(data).map(([k, v]) => [k, String(v)])) : {}
+          }
         }
       }
 

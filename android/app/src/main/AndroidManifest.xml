@@ -9,6 +9,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- Tell Firebase which notification channel to use by default for background messages -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="sons_barber_default" />
+
+        <!-- Set default notification icon and color -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorPrimary" />
+
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
@@ -36,6 +49,14 @@
     </application>
 
     <!-- Permissions -->
-
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required for FCM push notifications on Android 13+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Allow FCM to wake the device from deep sleep -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Allow FCM to receive messages after device reboot -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Allow vibration on notification -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
 </manifest>

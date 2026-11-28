@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sons Barber Notification Channels
+  Defined here as Android XML so the channel exists at the native level
+  even before the app JavaScript has a chance to run.
+  This ensures FCM can deliver notifications to the correct channel
+  when the app is completely killed or the screen is locked.
+-->
+<resources>
+    <channel
+        id="sons_barber_default"
+        name="Sons Barber Notifications"
+        description="Appointment, waitlist and promotion updates"
+        importance="4"
+        sound="default"
+        vibration="true"
+        lights="true"
+        lightColor="#C9A84C"
+        lockscreenVisibility="1"
+        showBadge="true" />
+</resources>
