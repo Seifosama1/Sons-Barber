@@ -4,6 +4,10 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  /* Remove blue/grey tap highlight squares on Android WebView */
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent text selection on tap for native-like feel */
+  -webkit-touch-callout: none;
 }
 
 html,
